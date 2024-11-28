@@ -11,7 +11,7 @@ void initializedDatabase(sqlite3* db){
         cerr << "Error creating table: " << messageError;
         sqlite3_free(messageError);
     } else {
-        cout << "Table initialized successfully.\n";
+        cout << "Table initialize successfully.\n";
     }
 }
 int main() {
