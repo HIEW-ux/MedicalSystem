@@ -2,12 +2,14 @@
 #include <string>
 #include <limits>
 #include "function_insert_user.h"
-#include "User.h"
+#include "user.h"
+#include "Patient.h"
 using namespace std;
 
 void logIn();
 
 void logIn(){
+        Patient* p = new Patient();
         string cpassword;
         string cusername;
         string username;
@@ -42,6 +44,7 @@ void logIn(){
             cout << "Username or Password incorrect, please try again";
         }else if(choice == 3){
             cout << "Patient login success!\n";
+            p->patientPlatForm();
         }else if(choice == 2){
             cout << "Doctor login success!\n";
         }else if(choice == 1){
