@@ -14,3 +14,10 @@ void InsertUserInfo(User* u);
 void InsertPatientInfo(Patient* p, string username);
 bool LoginAuth(string username, string password);
 void getPatientInfo(string username);
+
+using namespace std;
+
+static int callback(void* data, int argc, char** argv, char** azColName);
+void InsertUserInfo(User* u);
+void SelectUserInfo();
+bool LoginAuth(string username, string password);

@@ -4,6 +4,7 @@
 #include "function_insert_user.h"
 #include "user.h"
 #include "Patient.h"
+#include "User.h"
 using namespace std;
 
 void logIn();

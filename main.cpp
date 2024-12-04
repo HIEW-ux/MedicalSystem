@@ -4,6 +4,19 @@
 #include "Signin.h"
 using namespace std;
 
+<<<<<<< HEAD
+=======
+void initializedDatabase(sqlite3* db){
+    string userTable("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT,username TEXT NOT NULL UNIQUE,password TEXT NOT NULL,phonenumber TEXT NOT NULL,IC TEXT NOT NULL UNIQUE)");
+    char* messageError;
+    if (sqlite3_exec(db, userTable.c_str(), nullptr, nullptr, &messageError) != SQLITE_OK) {
+        cerr << "Error creating table: " << messageError;
+        sqlite3_free(messageError);
+    } else {
+        cout << "Table initialize successfully.\n";
+    }
+}
+>>>>>>> 47152b3a4dba7e51fcdb4319b975f7016b0db947
 int main() {
     sqlite3 *db;
     int exitCode;
