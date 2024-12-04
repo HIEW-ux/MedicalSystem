@@ -96,14 +96,6 @@ void SelectInfo(string table){
     sqlite3_close(DB);
 }
 //Authentication when login
-
-void SelectUserInfo(){
-    sqlite3* DB;
-    char* messageError;
-    int exit = sqlite3_open("medical_appointment_system.dg",&DB);
-    string query = "SELECT * FROM userTable;";
-    sqlite3_close(DB);
-}
 bool LoginAuth(string username, string password){
     sqlite3* DB;
     int exit = sqlite3_open("medical_appointment_system.db",&DB);
