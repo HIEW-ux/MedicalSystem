@@ -1,17 +1,19 @@
-#include <iostream>
 #include "sqlite3.h"
-#include "Login.h"
-#include "Signin.h"
+#include "Home.h"
 using namespace std;
 
 int main() {
+    //load patient Info into Map
+    loadPatientInfo();
+    //load user Info into Map
+    loadUserInfo();
     sqlite3 *db;
     int exitCode;
 
     exitCode = sqlite3_open("medical_appointment_system.db", &db);
 
     if (exitCode) {
-        std::cerr << "Error opening database: " << sqlite3_errmsg(db);
+        cerr << "Error opening database: " << sqlite3_errmsg(db);
         return exitCode;
     }
     initializedDatabase(db);
