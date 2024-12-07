@@ -2,7 +2,6 @@
 #include <string>
 #include <limits>
 #include "function_insert_user.h"
-#include "user.h"
 using namespace std;
 
 void signIn();

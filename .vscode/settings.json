@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "xstring": "cpp",
+        "format": "cpp",
+        "iostream": "cpp",
+        "tuple": "cpp",
+        "stack": "cpp",
+        "string": "cpp",
+        "ostream": "cpp",
+        "ios": "cpp",
+        "istream": "cpp",
+        "vector": "cpp",
+        "fstream": "cpp",
+        "cmath": "cpp",
+        "map": "cpp",
+        "limits": "cpp"
+    }
+}
