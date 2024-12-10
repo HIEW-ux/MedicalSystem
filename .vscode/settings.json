@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.dbclient-js": "javascript",
         "xstring": "cpp",
         "format": "cpp",
         "iostream": "cpp",
@@ -13,6 +14,7 @@
         "fstream": "cpp",
         "cmath": "cpp",
         "map": "cpp",
-        "limits": "cpp"
+        "limits": "cpp",
+        "iosfwd": "cpp"
     }
 }

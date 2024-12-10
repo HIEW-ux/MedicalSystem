@@ -3,10 +3,15 @@
 using namespace std;
 
 int main() {
+    loadDepartmentInfo();
     //load patient Info into Map
     loadPatientInfo();
     //load user Info into Map
     loadUserInfo();
+    //load Doctor Info into Map
+    loadDoctorInfo();
+    //load Medical records into linked list
+    loadMedicalRecords();
     sqlite3 *db;
     int exitCode;
 
