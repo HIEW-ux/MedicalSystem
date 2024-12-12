@@ -15,6 +15,10 @@
         "cmath": "cpp",
         "map": "cpp",
         "limits": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "system_error": "cpp",
+        "xlocale": "cpp",
+        "utility": "cpp",
+        "xiosbase": "cpp"
     }
 }

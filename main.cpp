@@ -3,15 +3,6 @@
 using namespace std;
 
 int main() {
-    loadDepartmentInfo();
-    //load patient Info into Map
-    loadPatientInfo();
-    //load user Info into Map
-    loadUserInfo();
-    //load Doctor Info into Map
-    loadDoctorInfo();
-    //load Medical records into linked list
-    loadMedicalRecords();
     sqlite3 *db;
     int exitCode;
 
@@ -22,8 +13,21 @@ int main() {
         return exitCode;
     }
     initializedDatabase(db);
+    loadAllergies();
+    loadInsuranceInfo();   
+    loadDepartmentInfo();
+    loadPatientInfo();
+    loadUserInfo();
+    loadDoctorInfo();
+    loadMedicalRecords();
+    loadPatientAddress();
+    loadServiceInfo();
+    loadAppointmentInfo();
+    loadEmergencyContactInfo();
+
      while(true) {
-        cout << "-----Welcome to New Era medical appointment schedule system------\n";
+        User *u = new User();
+        cout << "---------Welcome to New Era medical appointment schedule system---------\n";
         cout << "Please enter your choice: 1. Login 2. Sign in 3. forget password 4. Exit\n";
         int choice;
         cin >> choice;
