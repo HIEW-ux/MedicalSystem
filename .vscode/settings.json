@@ -19,6 +19,7 @@
         "system_error": "cpp",
         "xlocale": "cpp",
         "utility": "cpp",
-        "xiosbase": "cpp"
+        "xiosbase": "cpp",
+        "xlocinfo": "cpp"
     }
 }

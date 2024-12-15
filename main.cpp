@@ -24,19 +24,17 @@ int main() {
     loadServiceInfo();
     loadAppointmentInfo();
     loadEmergencyContactInfo();
+    loadPaymentInfo();
+    loadFeedbackInfo();
+    loadMedicineInfo();
+    loadPrescriptionInfo();
+    //deleteFunction();
 
      while(true) {
-        User *u = new User();
         cout << "---------Welcome to New Era medical appointment schedule system---------\n";
         cout << "Please enter your choice: 1. Login 2. Sign in 3. forget password 4. Exit\n";
         int choice;
-        cin >> choice;
-        if (cin.fail()) {
-            cin.clear(); 
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        choice = getValidatedNumericInput("Please enter valid choice: ");
         switch(choice) {
             case 1: logIn();
             break;

@@ -20,6 +20,7 @@ bool allergyContains(int choice, int PatientID);
 void allergyPlatForm();
 void checkAllergyInfo(int PatientID);
 void addAllergy();
+void EmergencyPlatform();
 void insertEmergencyContact();
 void insurancePlatForm();
 void checkInsuranceInfo(int PatientID);
@@ -34,6 +35,7 @@ void paymentFunction();
 void paymentProcess(int id);
 double insuranceProcess(int PatientID, int InsuranceID, sqlite3 *db, double price);
 string paymentMethod();
+void feedbackPlatform();
 void giveFeedback();
 bool serviceExists(int ServiceID);
 void showDoctorDashboard();
@@ -41,6 +43,11 @@ void displayDoctorInfo();
 void medicalRecordsPlatForm();
 void insertDoctorProfileInfo();
 void addMedicalRecords();
+void doctorAppointmentStatus();
+void prescriptionPlatform();
+void insertPrescription();
+void selectMedicine(int PrescriptionID);
+void displayPrescriptionWithMedicines(int prescriptionID);
 
 void signIn()
 {
@@ -49,14 +56,7 @@ void signIn()
         cout << "---------------------Register Platform-----------------------------\n";
         cout << "Please select account type: 1. Admin 2. Doctor 3. Patient 4. Exit\n";
         int choice;
-        cin >> choice;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        choice = getValidatedNumericInput("Please enter valid choice: ");
         switch (choice)
         {
         case 1:
@@ -78,15 +78,12 @@ void signIn()
 }
 void publicSignin()
 {
-    UserNode *user;
-    string input;
+    UserNode *user = new UserNode();
     bool flag;
     while (true)
     {
         cout << "Please enter username:\n";
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        getline(cin, input);
-        user->username = input;
+        user->username = getValidatedStringInput("Please enter valid username: ");
         if (!checkUserName(user->username) || UserList.isDuplicate(user->username))
         {
             cout << "Username format wrong or duplicate username, please try again\n";
@@ -102,9 +99,7 @@ void publicSignin()
     {
         string confirmpassword;
         cout << "Please enter your password:\n";
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        getline(cin, input);
-        user->password = input;
+        user->password = getValidatedStringInput("Please enter valid password: ");
         cout << "Confirm password\n";
         getline(cin, confirmpassword);
         if (user->password == confirmpassword)
@@ -120,8 +115,7 @@ void publicSignin()
     while (true)
     {
         cout << "Please enter your IC:\n";
-        getline(cin, input);
-        user->ic = input;
+        user->ic = getValidatedStringInput("Please enter valid IC: ");
         flag = checkIc(user->ic);
         if (flag)
         {
@@ -136,8 +130,7 @@ void publicSignin()
     while (true)
     {
         cout << "Please enter your phone number:\n";
-        getline(cin, input);
-        user->phonenumber = input;
+        user->phonenumber = getValidatedStringInput("Please enter valid phone number: ");
         flag = checkPhoneNumber(user->phonenumber);
         if (flag)
         {
@@ -225,14 +218,7 @@ void logIn()
     {
         cout << "-----------------------Login Platform-------------------------\n";
         cout << "Please select acc type: 1. admin 2. doctor 3. patient 4. exit\n";
-        cin >> choice;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        choice = getValidatedNumericInput("Please enter valid choice: ");
         switch (choice)
         {
         case 1:
@@ -251,7 +237,6 @@ void logIn()
         }
     }
     cout << "please enter username:\n";
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     username = getValidatedStringInput("Invalid input, please try again: ");
     cout << "Please enter password\n";
     password = getValidatedStringInput("Invalid input, please try again: ");
@@ -282,15 +267,8 @@ void patientPlatForm()
     {
         cout << "-----Welcome to patient service platform!-----\n"
              << "---------Please select your service.----------\n";
-        cout << "1. Me \n2. Medical Records \n3. Booking appointment \n4. appointment status \n5. Exit";
-        cin >> choice;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        cout << "1. Me \n2. Medical Records \n3. Booking appointment \n4. appointment status \n5. My Prescription \n6. Exit";
+        choice = getValidatedNumericInput("Please enter valid choice: ");
         switch (choice)
         {
         case 1:
@@ -305,9 +283,21 @@ void patientPlatForm()
         case 4:
             appointmentStatus();
             break;
-        }
-        if (choice == 5)
+        case 5:
+            int PatientID;
+            int PrescriptionID;
+            cout << "Please enter your patient ID: ";
+            PatientID = getValidatedNumericInput("Please enter valid ID: ");
+            PrescriptionList.displayPatientPrescription(PatientID);
+            cout << "Please enter prescription ID to view the medicine include: ";
+            PrescriptionID = getValidatedNumericInput("Please enter valid ID: ");
+            displayPrescriptionWithMedicines(PrescriptionID);
             break;
+        case 6:
+            return;
+        default:
+            cout << "invalid choice.\n";
+        }
     }
 }
 // Patient profile page, and the function
@@ -319,14 +309,7 @@ void information()
         cout << "-----------------Your profile page------------------\n"
              << "--------------Please select your service.-----------\n";
         cout << "1. Personal info\n2. Allergies\n3. Emergency Contact\n4. Insurance\n5. Address\n6. Exit\n";
-        cin >> choice;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        choice = getValidatedNumericInput("Please enter valid choice: ");
         switch (choice)
         {
         case 1:
@@ -336,7 +319,7 @@ void information()
             allergyPlatForm();
             break;
         case 3:
-            insertEmergencyContact();
+            EmergencyPlatform();
             break;
         case 4:
             insurancePlatForm();
@@ -346,62 +329,53 @@ void information()
             break;
         case 6:
             return;
+        default:
+            cout << "Invalid choice\n";
         }
     }
 }
 // Insert Personal details
 void insertPatientProfileInfo()
 {
-    PatientNode *patient;
+    PatientNode *patient = new PatientNode();
     int count;
 
     while (true)
     {
         cout << "First time login(0 for first time)? (0/1):\n";
-        cin >> count;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number (0 or 1).\n";
-            continue;
-        }
-
+        count = getValidatedNumericInput("Please enter valid choice: ");
         if (count == 1)
         {
             break;
         }
         else if (count == 0)
         {
-        cout << "Fill in your basic information.\n";
+            cout << "Fill in your basic information.\n";
 
-        cout << "Name:\n";
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        patient->name = getValidatedStringInput("Name cannot be empty. Please re-enter:");
+            cout << "Name:\n";
+            patient->name = getValidatedStringInput("Name cannot be empty. Please re-enter:");
 
-        cout << "Gender:\n";
-        patient->gender = getValidatedStringInput("Name cannot be empty. Please re-enter:");
-        while (true)
-        {
-            cout << "Age:\n";
-            int age = getValidatedNumericInput("Invalid input. Please enter a valid age (1-150):");
-            if (age > 0 && age < 150)
+            cout << "Gender:\n";
+            patient->gender = getValidatedStringInput("Name cannot be empty. Please re-enter:");
+            while (true)
             {
-                patient->age = age;
-                break;
+                cout << "Age:\n";
+                int age = getValidatedNumericInput("Invalid input. Please enter a valid age (1-150):");
+                if (age > 0 && age < 150)
+                {
+                    patient->age = age;
+                    break;
+                }
+                cout << "Invalid Age, please try again!\n";
             }
-            cout << "Invalid Age, please try again!\n";
-        }
-        cout << "Enter the username to associate with the patient: ";
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        string username = getValidatedStringInput("Username cannot be empty. Please re-enter:");
-        InsertPatientInfo(patient, username);
-        break;
+            cout << "Enter the username to associate with the patient: ";
+            string username = getValidatedStringInput("Username cannot be empty. Please re-enter:");
+            InsertPatientInfo(patient, username);
         }
         else
         {
             cout << "Invalid input, Please try again!\n";
-            return;
+            continue;
         }
     }
     while (true)
@@ -434,17 +408,19 @@ string getValidatedStringInput(const string &errorMessage)
 // Check number input valid or not
 int getValidatedNumericInput(const string &errorMessage)
 {
-    int input;
+    string input;
+    int result;
+
     while (true)
     {
-        cin >> input;
-        if (!cin.fail())
+        getline(cin, input);
+        stringstream ss(input);
+        if (ss >> result && ss.eof())
         {
-            return input;
+            return result;
         }
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cerr << errorMessage << endl;
+        cin.clear();
     }
 }
 // Allergy platform, check and add
@@ -457,14 +433,7 @@ void allergyPlatForm()
         cout << "----------Here is allergy PlatForm!----------\n"
              << "---------Please select your service.----------\n";
         cout << "1. View Allergy \n2. Add allergy \n3. allergy details\n4. Exit\n";
-        cin >> choice;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        choice = getValidatedNumericInput("Please enter valid choice: ");
         switch (choice)
         {
         case 1:
@@ -480,6 +449,8 @@ void allergyPlatForm()
             break;
         case 4:
             return;
+        default:
+            cout << "Invalid choice\n";
         }
     }
 }
@@ -548,7 +519,7 @@ void addAllergy()
     while (true)
     {
         cout << "Please enter your patient ID: ";
-        patientid = getValidatedNumericInput("Invalid Input, please try again!\n");
+        patientid = getValidatedNumericInput("Invalid Input, please try again!");
         if (PatientList.findPatient(patientid))
         {
             break;
@@ -568,7 +539,7 @@ void selectAllergy(int patientid)
     while (true)
     {
         cout << "Enter the ID of the allergy you want to select: ";
-        allergyid = getValidatedNumericInput("Invalid input, please try again!\n");
+        allergyid = getValidatedNumericInput("Invalid input, please try again!");
         if (AllergyList.findAllergy(allergyid) && !(allergyContains(allergyid, patientid)))
         {
             InsertAllergyPatient(patientid, allergyid);
@@ -623,21 +594,41 @@ bool allergyContains(int allergyid, int PatientID)
     return flag;
 }
 // Insert emergency contact function
+void EmergencyPlatform()
+{
+    int choice;
+    int PatientID;
+    while (true)
+    {
+        cout << "----------------Emergency Contact page---------------------\n"
+             << "--------------Please select your service.------------------\n";
+        cout << "1. Your Emergency Contact\n2. add Emergency Contact\n3. Exit\n";
+        choice = getValidatedNumericInput("Please enter valid choice: ");
+        switch (choice)
+        {
+        case 1:
+            cout << "Please enter your Patient ID: ";
+            PatientID = getValidatedNumericInput("Please enter valid ID: ");
+            EmergencyContactList.findEmergencyContact(PatientID);
+            break;
+        case 2:
+            insertEmergencyContact();
+            break;
+        case 3:
+            return;
+        default:
+            cout << "Invalid choice\n";
+        }
+    }
+}
 void insertEmergencyContact()
 {
-    EmergencyContactNode *ec;
+    EmergencyContactNode *ec = new EmergencyContactNode();
     int choice;
     while (true)
     {
         cout << "First Time insert emergency contact info?(0/1)(0 for first time): ";
-        cin >> choice;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        choice = getValidatedNumericInput("Please enter valid choice: ");
         if (choice == 1)
         {
             break;
@@ -651,7 +642,6 @@ void insertEmergencyContact()
                 return;
             }
             cout << "Please enter Contact name: ";
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             ec->contactName = getValidatedStringInput("Invalid input, please try again!\n");
             cout << "Please enter phone number: ";
             ec->phoneNumber = getValidatedStringInput("Invalid input, please try again!\n");
@@ -690,14 +680,7 @@ void insurancePlatForm()
         cout << "-----------------Insurance page------------------\n"
              << "--------------Please select your service.-----------\n";
         cout << "1. Your insurance\n2. add insurance\n3. insurance details\n4. Exit\n";
-        cin >> choice;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        choice = getValidatedNumericInput("Please enter valid choice: ");
         switch (choice)
         {
         case 1:
@@ -713,6 +696,8 @@ void insurancePlatForm()
             break;
         case 4:
             return;
+        default:
+            cout << "Invalid choice\n";
         }
     }
 }
@@ -901,14 +886,7 @@ void addressPlatForm()
         cout << "-------------------Address page------------------\n"
              << "--------------Please select your service.-----------\n";
         cout << "1. Your Address\n2. add address\n3. Exit\n";
-        cin >> choice;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        choice = getValidatedNumericInput("Please enter valid choice: ");
         switch (choice)
         {
         case 1:
@@ -921,6 +899,8 @@ void addressPlatForm()
             break;
         case 3:
             return;
+        default:
+            cout << "Invalid choice\n";
         }
     }
 }
@@ -933,7 +913,6 @@ void insertAddress()
     if (PatientList.findPatient(PatientID))
     {
         cout << "Please enter Country: ";
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         country = getValidatedStringInput("Please enter valid input: ");
         cout << "Please enter city: ";
         city = getValidatedStringInput("Please enter valid input: ");
@@ -995,7 +974,6 @@ void bookingAppointment()
 
         if (!PatientList.findPatient(PatientID))
         {
-            cout << "Invalid Patient ID. Please try again.\n";
             return; // No need for further actions if patient ID is invalid
         }
 
@@ -1043,7 +1021,6 @@ void bookingAppointment()
         }
         // Get appointment date and time
         cout << "Enter appointment date (YYYY-MM-DD): ";
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         date = getValidatedStringInput("Please enter valid date: ");
         if (!isValidDate(date))
         {
@@ -1058,7 +1035,6 @@ void bookingAppointment()
             {
                 // Add appointment info to the appointment list
                 AppointmentNode *app = new AppointmentNode(date, time, "Pending", PatientID, DoctorID, ServiceID);
-                AppointmentList.addAppointment(*app);
                 InsertAppointmentInfo(app);
                 cout << "Appointment booked successfully.\n";
                 break; // Exit loop after successful booking
@@ -1164,48 +1140,41 @@ bool isValidTime(const string &time)
 // Checking appointment status, cancel, making payment and give feedback
 void appointmentStatus()
 {
+    int PatientID;
     int choice;
     while (true)
     {
         cout << "---------Appointment Platform here!-----------\n"
              << "---------Please select your service.----------\n";
         cout << "1. My appointment \n2. Cancel appointment \n3. Payment \n4. Feedback\n5. Exit";
-        cin >> choice;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        choice = getValidatedNumericInput("Please enter valid choice: ");
         switch (choice)
         {
         case 1:
-            int id;
             cout << "Please enter Patient ID: ";
-            cin >> id;
-            AppointmentList.findAppointment(id);
+            PatientID = getValidatedNumericInput("Please enter valid ID: ");
+            AppointmentList.displayPatientAppointments(PatientID);
             break;
         case 2:
-            int PatientID;
             int choice;
             cout << "Please enter your patient ID: ";
-            cin >> PatientID;
-            AppointmentList.findAppointment(PatientID);
+            PatientID = getValidatedNumericInput("Please enter valid choice: ");
+            AppointmentList.displayPatientAppointments(PatientID);
             cout << "Please enter the appointment ID you want to delete: ";
-            cin >> choice;
+            choice = getValidatedNumericInput("Please enter valid choice: ");
             deleteAppointment(choice);
             break;
         case 3:
             paymentFunction();
             break;
         case 4:
+            feedbackPlatform();
             break;
         case 5:
             return;
+        default:
+            cout << "Invalid choice\n";
         }
-        if (choice == 5)
-            break;
     }
 }
 void paymentFunction()
@@ -1213,10 +1182,10 @@ void paymentFunction()
     int PatientID;
     int AppointmentID;
     cout << "Please enter your patient ID to get your appointment list: ";
-    cin >> PatientID;
+    PatientID = getValidatedNumericInput("Please enter valid choice: ");
     AppointmentList.findAppointment(PatientID);
     cout << "Please enter an appointment you want to pay: ";
-    cin >> AppointmentID;
+    AppointmentID = getValidatedNumericInput("Please enter valid choice: ");
     paymentProcess(AppointmentID);
 }
 void paymentProcess(int ID)
@@ -1260,13 +1229,13 @@ void paymentProcess(int ID)
         cout << fixed << setprecision(2) << "Price: RM" << price << "\n";
 
         cout << "Do you have insurance?(Y/N): ";
-        cin >> choice;
+        choice = getValidatedNumericInput("Please enter valid choice: ");
 
         if (toupper(choice) == 'Y')
         {
             int insuranceID;
             cout << "Enter your insurance ID: ";
-            cin >> insuranceID;
+            insuranceID = getValidatedNumericInput("Please enter valid choice: ");
             price = insuranceProcess(patientID, insuranceID, db, price);
         }
         else if (toupper(choice) != 'N')
@@ -1357,7 +1326,7 @@ string paymentMethod()
 
         int method;
         cout << "Enter your choice: ";
-        cin >> method;
+        method = getValidatedNumericInput("Please enter valid choice: ");
 
         switch (method)
         {
@@ -1382,19 +1351,67 @@ string paymentMethod()
     }
     return m;
 }
+void feedbackPlatform()
+{
+    int choice;
+    int PatientID;
+    while (true)
+    {
+        cout << "-------------------Feedback page------------------\n"
+             << "--------------Please select your service.-----------\n";
+        cout << "1. Your feedback\n2. Give feedback\n3. Exit\n";
+        choice = getValidatedNumericInput("Please enter valid choice: ");
+        switch (choice)
+        {
+        case 1:
+            cout << "Please enter your Patient ID: ";
+            PatientID = getValidatedNumericInput("Please enter valid ID: ");
+            FeedbackList.displayPatientFeedback(PatientID);
+            break;
+        case 2:
+            giveFeedback();
+            break;
+        case 3:
+            return;
+        default:
+            cout << "Invalid choice\n";
+        }
+    }
+}
 void giveFeedback()
 {
     int PatientID;
     int AppointmentID;
+    int DoctorID;
+    int rating;
+    string describe;
     while (true)
     {
         cout << "Please enter your Patient ID: ";
-        cin >> PatientID;
+        PatientID = getValidatedNumericInput("Please enter valid input: ");
         if (PatientList.findPatient(PatientID))
         {
-            AppointmentList.findAppointment(PatientID);
+            AppointmentList.displayPatientAppointments(PatientID);
             cout << "Please select appointment ID that you want to evaluate: ";
-            cin >> AppointmentID;
+            AppointmentID = getValidatedNumericInput("Please enter valid input: ");
+            if (AppointmentList.findAppointment(AppointmentID))
+            {
+                cout << "Please enter describe: ";
+                cin.ignore();
+                describe = getValidatedStringInput("Please enter valid describe: ");
+                cout << "Please enter rating (1-5): ";
+                rating = getValidatedNumericInput("Please enter valid rating: ");
+                if (rating > 5 || rating < 1)
+                {
+                    cout << "Rating invalid, please try again!\n";
+                    return;
+                }
+                cout << "Please enter the doctor ID: ";
+                DoctorID = getValidatedNumericInput("Please enter valid ID:");
+                FeedbackNode *feedback = new FeedbackNode(describe, rating, PatientID, DoctorID, AppointmentID);
+                InsertFeedbackInfo(feedback);
+                return;
+            }
         }
     }
 }
@@ -1405,15 +1422,8 @@ void showDoctorDashboard()
     {
         cout << "-----Welcome to Doctor service platform!-----\n"
              << "---------Please select your service.----------\n";
-        cout << "1. Me \n2. Medical Records \n3. Check appointment status\n4. Medical Record\n5. Exit";
-        cin >> choice;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        cout << "1. Me \n2. Medical Records \n3. Check appointment status\n4. Prescription\n5. Exit";
+        choice = getValidatedNumericInput("Please enter valid choice: ");
         switch (choice)
         {
         case 1:
@@ -1423,10 +1433,16 @@ void showDoctorDashboard()
             medicalRecordsPlatForm();
             break;
         case 3:
+            doctorAppointmentStatus();
             break;
+        case 4:
+            prescriptionPlatform();
+            break;
+        case 5:
+            return;
+        default:
+            cout << "Invalid choice\n";
         }
-        if (choice == 5)
-            break;
     }
 }
 void displayDoctorInfo()
@@ -1437,14 +1453,7 @@ void displayDoctorInfo()
         cout << "-----------------Your profile page------------------\n"
              << "--------------Please select your service.-----------\n";
         cout << "1. Personal info\n2. Department Info\n3. Hospital Info\n4. Exit\n";
-        cin >> choice;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        choice = getValidatedNumericInput("Please enter valid choice: ");
         switch (choice)
         {
         case 1:
@@ -1459,6 +1468,8 @@ void displayDoctorInfo()
             break;
         case 4:
             return;
+        default:
+            cout << "Invalid choice.\n";
         }
     }
 }
@@ -1467,18 +1478,11 @@ void insertDoctorProfileInfo()
     int count = 0;
     string username;
     int id;
-    DoctorNode *d;
+    DoctorNode *d = new DoctorNode();
     while (count == 0)
     {
         cout << "First time login(0 for first time)?(0/1):\n";
-        cin >> count;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        count = getValidatedNumericInput("Please enter valid choice: ");
         if (count == 1)
         {
             break;
@@ -1487,17 +1491,15 @@ void insertDoctorProfileInfo()
         int intInput;
         cout << "Fill in your basic information.\n";
         cout << "Name: ";
-        cin.ignore();
         d->name = getValidatedStringInput("Please enter valid input: ");
         cout << "Age: ";
         d->age = getValidatedNumericInput("Please enter valid input: ");
         cout << "Gender: ";
-        cin.ignore();
         d->gender = getValidatedStringInput("Please enter valid input: ");
         cout << "Specialty: ";
         d->specialty = getValidatedStringInput("Please enter valid input: ");
         cout << "Enter the username to associate with the Doctor: ";
-        getline(cin, username);
+        username = getValidatedStringInput("Please enter valid username: ");
         if (username.empty())
         {
             cerr << "Username cannot be empty.\n";
@@ -1508,7 +1510,7 @@ void insertDoctorProfileInfo()
         {
             DepartmentList.printDepartment();
             cout << "Enter the department to associate with the Doctor: ";
-            getline(cin, department);
+            department = getValidatedStringInput("Please enter valid department: ");
 
             if (DepartmentList.exists(department))
             {
@@ -1536,16 +1538,9 @@ void medicalRecordsPlatForm()
     while (true)
     {
         cout << "-----Medical Records here! Do anything you want!-----\n"
-             << "---------Please select your choice.----------\n";
+             << "--------------Please select your choice.--------------\n";
         cout << "1. Add medical records \n2. Check Medical Records \n3. Exit\n";
-        cin >> choice;
-        if (cin.fail())
-        {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number.\n";
-            continue;
-        }
+        choice = getValidatedNumericInput("Please enter valid choice: ");
         switch (choice)
         {
         case 1:
@@ -1554,7 +1549,7 @@ void medicalRecordsPlatForm()
         case 2:
             int id;
             cout << "Please enter patient ID: ";
-            cin >> id;
+            id = getValidatedNumericInput("Please enter valid choice: ");
             Records = recordList.findRecords(id);
             if (!Records.empty())
             {
@@ -1577,12 +1572,14 @@ void medicalRecordsPlatForm()
             break;
         case 3:
             return;
+        default:
+            cout << "Invalid choice.\n";
         }
     }
 }
 void addMedicalRecords()
 {
-    MedicalRecordsNode *record;
+    MedicalRecordsNode *record = new MedicalRecordsNode();
     int DoctorID;
     int PatientID;
     while (true)
@@ -1601,7 +1598,6 @@ void addMedicalRecords()
                 {
                     record->patientID = PatientID;
                     cout << "Enter records: ";
-                    cin.ignore();
                     record->details = getValidatedStringInput("Please enter valid input: ");
                     time_t now = time(0);
                     struct tm tstruct;
@@ -1609,8 +1605,6 @@ void addMedicalRecords()
                     char buf[11];
                     strftime(buf, sizeof(buf), "%Y-%m-%d", &tstruct);
                     record->date = buf;
-
-                    recordList.addRecords(*record);
                     InsertMedicalRecords(record);
                     cout << "Records insert successfully!\n";
                 }
@@ -1627,4 +1621,179 @@ void addMedicalRecords()
             return;
         }
     }
+}
+void doctorAppointmentStatus()
+{
+    int DoctorID;
+    while (true)
+    {
+        cout << "Please enter your doctor ID (0 for exits): ";
+        DoctorID = getValidatedNumericInput("Please enter valid ID: ");
+        if (DoctorList.findDoctor(DoctorID))
+        {
+            AppointmentList.displayDoctorAppointments(DoctorID);
+            return;
+        }
+        else
+        {
+            return;
+        }
+        if (DoctorID == 0)
+        {
+            cout << "Exiting...\n";
+            return;
+        }
+    }
+}
+void prescriptionPlatform()
+{
+    int choice;
+    int DoctorID;
+    int prescriptionID;
+    while (true)
+    {
+        cout << "-----------------Prescription page------------------\n"
+             << "--------------Please select your service.-----------\n";
+        cout << "1. My prescription\n2. Add prescription\n3. Medicine Info\n4. Exit\n";
+        choice = getValidatedNumericInput("Please enter valid choice: ");
+        switch (choice)
+        {
+        case 1:
+            cout << "Please enter your Doctor ID: ";
+            DoctorID = getValidatedNumericInput("Please enter valid ID: ");
+            PrescriptionList.displayDoctorPrescription(DoctorID);
+            cout << "Please enter prescription ID to view the medicine include: ";
+            prescriptionID = getValidatedNumericInput("Please enter valid ID: ");
+            displayPrescriptionWithMedicines(prescriptionID);
+            break;
+        case 2:
+            insertPrescription();
+            break;
+        case 3:
+            MedicineList.displayMedicine();
+            break;
+        case 4:
+            return;
+        default:
+            cout << "Invalid choice.\n";
+        }
+    }
+}
+void insertPrescription()
+{
+    PrescriptionNode *prescription = new PrescriptionNode();
+    while (true)
+    {
+        cout << "Please enter your doctor ID (0 for exit): ";
+        prescription->DoctorID = getValidatedNumericInput("Please enter valid ID: ");
+        if (DoctorList.findDoctor(prescription->DoctorID))
+        {
+            PatientList.displayPatients();
+            cout << "Select the patient you want to add prescription: ";
+            prescription->PatientID = getValidatedNumericInput("Please enter valid ID: ");
+            if (PatientList.findPatient(prescription->PatientID))
+            {
+                cout << "Enter the instructions: ";
+                prescription->instructions = getValidatedStringInput("Please enter valid input: ");
+                time_t now = time(0);
+                struct tm tstruct;
+                localtime_s(&tstruct, &now);
+                char buf[11];
+                strftime(buf, sizeof(buf), "%Y-%m-%d", &tstruct);
+                prescription->date = buf;
+                int prescriptionID = InsertPrescriptionInfo(prescription);
+                selectMedicine(prescriptionID);
+                return;
+            }
+            else
+            {
+                return;
+            }
+        }
+        else if (prescription->DoctorID == 0)
+        {
+            cout << "Exiting...\n";
+            return;
+        }
+        else
+        {
+            return;
+        }
+    }
+}
+void selectMedicine(int PrescriptionID)
+{
+    while(true)
+    {
+        MedicineList.displayMedicine();
+        cout << "Enter medicine ID to add to the prescription (0 for exit): ";
+        int MedicineID = getValidatedNumericInput("Please enter a valid Medicine ID: ");
+        if (MedicineID == 0)
+        {
+            cout << "Exiting medicine selection...\n";
+            break; 
+        }
+        if (MedicineList.findMedicine(MedicineID))
+        {
+            InsertPrescriptionMedicine(PrescriptionID, MedicineID);
+            cout << "Added Medicine ID: " << MedicineID << " to prescription.\n";
+        }
+        else
+        {
+            cout << "Medicine ID: " << MedicineID << " is invalid or not found. Please try again.\n";
+        }
+    }
+}
+void displayPrescriptionWithMedicines(int prescriptionID)
+{
+    sqlite3 *db;
+    string query = 
+        "SELECT m.MedicineID, m.Name, m.Description "
+        "FROM Prescription_Medicine pm "
+        "JOIN Medicine m ON pm.MedicineID = m.MedicineID "
+        "WHERE pm.PrescriptionID = ?";
+
+    int exit = sqlite3_open("medical_appointment_system.db", &db);
+
+    // Check if the database opened successfully
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+
+    // Bind the prescription ID
+    sqlite3_bind_int(stmt, 1, prescriptionID);
+
+    cout << "Medicines for Prescription ID: " << prescriptionID << "\n";
+    cout << "---------------------------------------------\n";
+
+    bool hasData = false;
+    while (sqlite3_step(stmt) == SQLITE_ROW)
+    {
+        hasData = true;
+        int medicineID = sqlite3_column_int(stmt, 0);
+        const char* name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        const char* description = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+
+        cout << "Medicine ID: " << medicineID << "\n";
+        cout << "Name: " << name << "\n";
+        cout << "Description: " << description << "\n";
+        cout << "---------------------------------------------\n";
+    }
+
+    if (!hasData)
+    {
+        cout << "No medicines found for this prescription.\n";
+    }
+
+    sqlite3_close(db);
+    sqlite3_finalize(stmt); // Clean up statement
 }
