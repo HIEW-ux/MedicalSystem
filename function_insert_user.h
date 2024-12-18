@@ -27,6 +27,7 @@ class Appointment;
 class feedback;
 class Medicine;
 class Prescription;
+class Admin;
 // linked list
 struct UserNode
 {
@@ -34,12 +35,13 @@ struct UserNode
     string password;
     string phonenumber;
     string ic;
+    string role;
     int id;
     UserNode *next;
 
-    UserNode() {}
-    UserNode(const string &username, const string &password, const string &phonenumber, const string &ic)
-        : username(username), password(password), phonenumber(phonenumber), ic(ic), next(nullptr) {}
+    UserNode() : next(nullptr) {}
+    UserNode(const string &username, const string &password, const string &phonenumber, const string &ic, const string &role)
+        : username(username), password(password), phonenumber(phonenumber), ic(ic), role(role), next(nullptr) {}
     void setID(int id)
     {
         this->id = id;
@@ -108,7 +110,7 @@ struct EmergencyContactNode
     string relationShip;
     EmergencyContactNode *next;
 
-    EmergencyContactNode() {}
+    EmergencyContactNode() : next(nullptr) {}
     EmergencyContactNode(int patientid, string contactName, string phoneNumber, string relationShip)
         : patientid(patientid), contactName(contactName), phoneNumber(phoneNumber), relationShip(relationShip), next(nullptr) {}
 
@@ -277,6 +279,22 @@ struct PrescriptionNode
         this->PrescriptionID = id;
     }
 };
+struct AdminNode
+{
+    int AdminID;
+    string name;
+    int UserID;
+    AdminNode *next;
+
+    AdminNode() {}
+    AdminNode(const string &name, int UserID)
+        : name(name), UserID(UserID), next(nullptr) {}
+
+    void setID(int id)
+    {
+        this->AdminID = id;
+    }
+};
 // Class
 class User
 {
@@ -288,15 +306,7 @@ public:
     User() : head(nullptr), tail(nullptr) {}
     ~User()
     {
-        UserNode *current = head;
-        while (current != nullptr)
-        {
-            UserNode *next = current->next;
-            delete current;
-            current = next;
-        }
-        head = nullptr;
-        tail = nullptr;
+        clear();
     }
     void addUser(const UserNode &user)
     {
@@ -350,7 +360,7 @@ public:
             current = current->next;
         }
     }
-    bool isDuplicate(string username)
+    bool isDuplicate(const string &username)
     {
         UserNode *current = head;
         while (current != nullptr)
@@ -363,18 +373,79 @@ public:
         }
         return false;
     }
-    bool loginAuth(string username, string password)
+    bool loginAuth(const string &username, const string &password, const string &role)
     {
         UserNode *current = head;
         while (current != nullptr)
         {
-            if (current->username == username && current->password == password)
+            if (current->username == username && current->password == password && current->role == role)
             {
                 return true;
             }
             current = current->next;
         }
         return false;
+    }
+    void updateUser(UserNode *user)
+    {
+        UserNode *current = head;
+        while (current != nullptr)
+        {
+            if (current->id == user->id)
+            {
+                current->username = user->username;
+                current->password = user->password;
+                current->phonenumber = user->phonenumber;
+                current->ic = user->ic;
+                break;
+            }
+            current = current->next;
+        }
+    }
+    void deleteUser(int userID)
+    {
+        UserNode *current = head;
+        UserNode *previous = nullptr;
+
+        while (current != nullptr)
+        {
+            if (current->id == userID)
+            {
+                if (previous == nullptr)
+                {
+                    head = current->next;
+                }
+                else
+                {
+                    previous->next = current->next;
+                }
+
+                if (current == tail)
+                {
+                    tail = previous;
+                }
+
+                delete current;
+                cout << "User with ID " << userID << " deleted.\n";
+                return;
+            }
+            previous = current;
+            current = current->next;
+        }
+
+        cout << "User with ID " << userID << " not found.\n";
+    }
+    void clear()
+    {
+        UserNode *current = head;
+        while (current != nullptr)
+        {
+            UserNode *next = current->next;
+            delete current;
+            current = next;
+        }
+        head = nullptr;
+        tail = nullptr;
     }
 };
 class Patient
@@ -387,15 +458,7 @@ public:
     Patient() : head(nullptr), tail(nullptr) {}
     ~Patient()
     {
-        PatientNode *current = head;
-        while (current != nullptr)
-        {
-            PatientNode *next = current->next;
-            delete current;
-            current = next;
-        }
-        head = nullptr;
-        tail = nullptr;
+        clear();
     }
     void addPatient(const PatientNode &patient)
     {
@@ -447,6 +510,66 @@ public:
             current = current->next;
         }
     }
+    void updatePatient(PatientNode *patient)
+    {
+        PatientNode *current = head;
+        while (current != nullptr)
+        {
+            if (current->id == patient->id)
+            {
+                current->name = patient->name;
+                current->age = patient->age;
+                current->gender = patient->gender;
+                break;
+            }
+            current = current->next;
+        }
+    }
+    void deletePatient(int PatientID)
+    {
+        PatientNode *current = head;
+        PatientNode *previous = nullptr;
+
+        while (current != nullptr)
+        {
+            if (current->id == PatientID)
+            {
+                if (previous == nullptr)
+                {
+                    head = current->next;
+                }
+                else
+                {
+                    previous->next = current->next;
+                }
+
+                if (current == tail)
+                {
+                    tail = previous;
+                }
+
+                delete current;
+                cout << "Patient with ID " << PatientID << " deleted.\n";
+                return;
+            }
+            previous = current;
+            current = current->next;
+        }
+
+        cout << "Patient with ID " << PatientID << " not found.\n";
+    }
+    void clear()
+    {
+        PatientNode *current = head;
+        while (current != nullptr)
+        {
+            PatientNode *next = current->next;
+            delete current;
+            current = next;
+        }
+        head = nullptr;
+        tail = nullptr;
+    }
 };
 class Doctor
 {
@@ -458,15 +581,7 @@ public:
     Doctor() : head(nullptr), tail(nullptr) {}
     ~Doctor()
     {
-        DoctorNode *current = head;
-        while (current != nullptr)
-        {
-            DoctorNode *next = current->next;
-            delete current;
-            current = next;
-        }
-        head = nullptr;
-        tail = nullptr;
+        clear();
     }
     void addDoctor(const DoctorNode &doctor)
     {
@@ -522,42 +637,96 @@ public:
     }
     void bubbleSorting()
     {
-        if (!head || !head->next)
-        {
-            return;
-        }
-        for (DoctorNode *i = head; i != nullptr; i = i->next)
-        {
-            for (DoctorNode *j = head; j->next != nullptr; j = j->next)
-            {
-                if (j->age > j->next->age)
-                {
-                    int tempDoctorID = j->doctorID;
-                    j->doctorID = j->next->doctorID;
-                    j->next->doctorID = tempDoctorID;
+    bool swapped;
+    DoctorNode* end = nullptr;
 
-                    string tempName = j->name;
-                    j->name = j->next->name;
-                    j->next->name = tempName;
+    do {
+        swapped = false;
+        DoctorNode* prev = nullptr;
+        DoctorNode* current = head;
+        DoctorNode* temp = nullptr;
 
-                    int tempAge = j->age;
-                    j->age = j->next->age;
-                    j->next->age = tempAge;
+        while (current->next != end) {
+            if (current->age > current->next->age) {
+                temp = current->next;
+                current->next = temp->next;
+                temp->next = current;
 
-                    string tempGender = j->gender;
-                    j->gender = j->next->gender;
-                    j->next->gender = tempGender;
-
-                    string tempSpecialty = j->specialty;
-                    j->specialty = j->next->specialty;
-                    j->next->specialty = tempSpecialty;
-
-                    int tempDepartmentID = j->departmentid;
-                    j->departmentid = j->next->departmentid;
-                    j->next->departmentid = tempDepartmentID;
+                if (prev) {
+                    prev->next = temp;
+                } else {
+                    head = temp;
                 }
+
+                swapped = true;
             }
+            prev = (swapped ? temp : current);
+            current = prev->next;
         }
+        end = current;
+    } while (swapped);
+    }
+    void updateDoctor(DoctorNode *doctor)
+    {
+        DoctorNode *current = head;
+        while (current != nullptr)
+        {
+            if (current->doctorID == doctor->doctorID)
+            {
+                current->name = doctor->name;
+                current->age = doctor->age;
+                current->gender = doctor->gender;
+                current->specialty = doctor->specialty;
+                current->departmentid = doctor->departmentid;
+                break;
+            }
+            current = current->next;
+        }
+    }
+    void deleteDoctor(int DoctorID)
+    {
+        DoctorNode *current = head;
+        DoctorNode *previous = nullptr;
+
+        while (current != nullptr)
+        {
+            if (current->doctorID == DoctorID)
+            {
+                if (previous == nullptr)
+                {
+                    head = current->next;
+                }
+                else
+                {
+                    previous->next = current->next;
+                }
+
+                if (current == tail)
+                {
+                    tail = previous;
+                }
+
+                delete current;
+                cout << "Doctor with ID " << DoctorID << " deleted.\n";
+                return;
+            }
+            previous = current;
+            current = current->next;
+        }
+
+        cout << "Doctor with ID " << DoctorID << " not found.\n";
+    }
+    void clear()
+    {
+        DoctorNode *current = head;
+        while (current != nullptr)
+        {
+            DoctorNode *next = current->next;
+            delete current;
+            current = next;
+        }
+        head = nullptr;
+        tail = nullptr;
     }
 };
 class Allergy
@@ -907,19 +1076,61 @@ public:
     {
         clear();
     }
-    vector<MedicalRecordsNode *> findRecords(int id)
+    void displayPatientMedicalRecords(int id)
     {
-        vector<MedicalRecordsNode *> result;
         MedicalRecordsNode *current = head;
+        bool found = false;
         while (current != nullptr)
         {
             if (current->patientID == id)
             {
-                result.push_back(current);
+                if (!found)
+                {
+                    cout << "Found medical records for Patient ID " << id << ":\n";
+                    found = true;
+                }
+                cout << "-----------------------------------------\n";
+                cout << "Record ID: " << current->recordID
+                     << "\n Doctor ID: " << current->doctorID
+                     << "\n Patient ID: " << current->patientID
+                     << "\n Details: " << current->details
+                     << "\n Date: " << current->date << endl;
+                cout << "-----------------------------------------\n";
             }
             current = current->next;
         }
-        return result;
+        if (!found)
+        {
+            cout << "No records found for Patient ID " << id << "\n";
+        }
+    }
+    void displayDoctorMedicalRecords(int id)
+    {
+        MedicalRecordsNode *current = head;
+        bool found = false;
+        while (current != nullptr)
+        {
+            if (current->doctorID == id)
+            {
+                if (!found)
+                {
+                    cout << "Found medical records for Doctor ID " << id << ":\n";
+                    found = true;
+                }
+                cout << "-----------------------------------------\n";
+                cout << "Record ID: " << current->recordID
+                     << "\n Doctor ID: " << current->doctorID
+                     << "\n Patient ID: " << current->patientID
+                     << "\n Details: " << current->details
+                     << "\n Date: " << current->date << endl;
+                cout << "-----------------------------------------\n";
+            }
+            current = current->next;
+        }
+        if (!found)
+        {
+            cout << "No records found for Doctor ID " << id << "\n";
+        }
     }
     void addRecords(const MedicalRecordsNode &record)
     {
@@ -940,11 +1151,13 @@ public:
         MedicalRecordsNode *current = head;
         while (current)
         {
+            cout << "-----------------------------------------\n";
             cout << "Record ID: " << current->recordID
                  << "\n Doctor ID: " << current->doctorID
                  << "\n Patient ID: " << current->patientID
                  << "\n Details: " << current->details
                  << "\n Date: " << current->date << endl;
+            cout << "-----------------------------------------\n";
             current = current->next;
         }
     }
@@ -1089,6 +1302,7 @@ public:
             tail = newAppointment;
         }
     }
+    // For patient to view their appointment
     void displayPatientAppointments(int id)
     {
         vector<AppointmentNode *> result;
@@ -1122,6 +1336,43 @@ public:
             cout << "No records found for Patient ID " << id << "\n";
         }
     }
+    // For patient view appointments uncompleted
+    bool displayPatientPendingAppointments(int id)
+    {
+        vector<AppointmentNode *> result;
+        AppointmentNode *current = head;
+        while (current != nullptr)
+        {
+            if (current->PatientID == id && current->status != "Paid")
+            {
+                result.push_back(current);
+            }
+            current = current->next;
+        }
+        if (!result.empty())
+        {
+            cout << "Found appointments for Patient ID " << id << ":\n";
+            for (const auto &app : result)
+            {
+                cout << "------------------------------------------\n";
+                cout << "Appointment ID: " << app->AppointmentID << "\n"
+                     << "Date: " << app->date << "\n"
+                     << "Time: " << app->time << "\n"
+                     << "Status: " << app->status << "\n"
+                     << "Patient ID: " << app->PatientID << "\n"
+                     << "Doctor ID: " << app->DoctorID << "\n"
+                     << "Service ID: " << app->ServiceID << "\n";
+                cout << "------------------------------------------\n";
+            }
+            return true;
+        }
+        else
+        {
+            cout << "No records found for Patient ID " << id << "\n";
+            return false;
+        }
+    }
+    // For doctor to view their appointment
     void displayDoctorAppointments(int id)
     {
         vector<AppointmentNode *> result;
@@ -1155,6 +1406,24 @@ public:
             cout << "No records found for Doctor ID " << id << "\n";
         }
     }
+     void displayAppointment()
+    {
+        AppointmentNode *current = head;
+        cout << "\n--- Appointment history ---\n";
+        while (current != nullptr)
+        {
+            cout << "------------------------------------------\n";
+                cout << "Appointment ID: " << current->AppointmentID << "\n"
+                     << "Date: " << current->date << "\n"
+                     << "Time: " << current->time << "\n"
+                     << "Status: " << current->status << "\n"
+                     << "Patient ID: " << current->PatientID << "\n"
+                     << "Doctor ID: " << current->DoctorID << "\n"
+                     << "Service ID: " << current->ServiceID << "\n";
+                cout << "------------------------------------------\n";
+            current = current->next;
+        }
+    }
     bool findAppointment(int id)
     {
         AppointmentNode *current = head;
@@ -1178,6 +1447,87 @@ public:
         }
         return false;
     }
+    void bubbleSorting() {
+    bool swapped;
+    AppointmentNode* end = nullptr;
+
+    do {
+        swapped = false;
+        AppointmentNode* prev = nullptr;
+        AppointmentNode* current = head;
+        AppointmentNode* temp = nullptr;
+
+        while (current->next != end) {
+            if (current->date > current->next->date) {
+                temp = current->next;
+                current->next = temp->next;
+                temp->next = current;
+
+                if (prev) {
+                    prev->next = temp;
+                } else {
+                    head = temp;
+                }
+
+                swapped = true;
+            }
+
+            prev = (swapped ? temp : current);
+            current = prev->next;
+        }
+        end = current;
+    } while (swapped);
+}
+    void updateAppointment(AppointmentNode *appointment)
+    {
+        AppointmentNode *current = head;
+        while (current != nullptr)
+        {
+            if (current->AppointmentID == appointment->AppointmentID)
+            {
+                current->date = appointment->date;
+                current->DoctorID = appointment->DoctorID;
+                current->ServiceID = appointment->ServiceID;
+                current->time = appointment->time;
+                break;
+            }
+            current = current->next;
+        }
+    }
+    void deleteAppointment(int AppointmentID)
+    {
+        AppointmentNode *current = head;
+        AppointmentNode *previous = nullptr;
+
+        while (current != nullptr)
+        {
+            if (current->AppointmentID == AppointmentID)
+            {
+                if (previous == nullptr)
+                {
+                    head = current->next;
+                }
+                else
+                {
+                    previous->next = current->next;
+                }
+
+                if (current == tail)
+                {
+                    tail = previous;
+                }
+
+                delete current;
+                cout << "Appointment with ID " << AppointmentID << " deleted.\n";
+                return;
+            }
+            previous = current;
+            current = current->next;
+        }
+
+        cout << "Appointment with ID " << AppointmentID << " not found.\n";
+    }
+
 };
 class Feedback
 {
@@ -1281,6 +1631,38 @@ public:
             cout << "No records found for Patient ID " << id << "\n";
         }
     }
+    void displayDoctorFeedback(int id)
+    {
+        vector<FeedbackNode *> result;
+        FeedbackNode *current = head;
+        while (current != nullptr)
+        {
+            if (current->doctorID == id)
+            {
+                result.push_back(current);
+            }
+            current = current->next;
+        }
+        if (!result.empty())
+        {
+            cout << "Found feedback for Doctor ID " << id << ":\n";
+            for (const auto &feedback : result)
+            {
+                cout << "-----------------------------------------\n";
+                cout << "feedback ID: " << feedback->feedbackID << "\n";
+                cout << "Describe: " << feedback->describe << "\n";
+                cout << "Rating: " << feedback->rating << "\n";
+                cout << "Appointment ID: " << feedback->appointmentID << "\n";
+                cout << "Patient ID: " << feedback->patientID << "\n";
+                cout << "Doctor ID: " << feedback->doctorID << "\n";
+                cout << "-----------------------------------------\n";
+            }
+        }
+        else
+        {
+            cout << "No records found for Doctor ID " << id << "\n";
+        }
+    }
 };
 class Medicine
 {
@@ -1348,6 +1730,53 @@ public:
             current = current->next;
         }
     }
+    void updateMedicine(MedicineNode *medicine)
+    {
+        MedicineNode *current = head;
+        while (current != nullptr)
+        {
+            if (current->MedicineID == medicine->MedicineID)
+            {
+                current->name = medicine->name;
+                current->description = medicine->description;
+                break;
+            }
+            current = current->next;
+        }
+    }
+    void deleteMedicine(int MedicineID)
+    {
+        MedicineNode *current = head;
+        MedicineNode *previous = nullptr;
+
+        while (current != nullptr)
+        {
+            if (current->MedicineID == MedicineID)
+            {
+                if (previous == nullptr)
+                {
+                    head = current->next;
+                }
+                else
+                {
+                    previous->next = current->next;
+                }
+
+                if (current == tail)
+                {
+                    tail = previous;
+                }
+
+                delete current;
+                cout << "Medicine with ID " << MedicineID << " deleted.\n";
+                return;
+            }
+            previous = current;
+            current = current->next;
+        }
+
+        cout << "Medicine with ID " << MedicineID << " not found.\n";
+    }
 };
 class Prescription
 {
@@ -1400,31 +1829,28 @@ public:
     }
     void displayPatientPrescription(int id)
     {
-        vector<PrescriptionNode *> result;
         PrescriptionNode *current = head;
+        bool found = false;
         while (current != nullptr)
         {
             if (current->PatientID == id)
             {
-                result.push_back(current);
+                if (!found)
+                {
+                    cout << "Found Prescriptions for Patient ID " << id << ":\n";
+                    found = true;
+                }
+                cout << "-----------------------------------------\n";
+                cout << "Prescription ID: " << current->PrescriptionID << "\n";
+                cout << "Patient ID: " << current->PatientID << "\n";
+                cout << "Date: " << current->date << "\n";
+                cout << "Instructions: " << current->instructions << "\n";
+                cout << "Doctor ID: " << current->DoctorID << "\n";
+                cout << "-----------------------------------------\n";
             }
             current = current->next;
         }
-        if (!result.empty())
-        {
-            cout << "Found Prescriptions for Patient ID " << id << ":\n";
-            for (const auto &app : result)
-            {
-                cout << "-----------------------------------------\n";
-                cout << "Prescription ID: " << app->PrescriptionID << "\n";
-                cout << "Patient ID: " << app->PatientID << "\n";
-                cout << "Date: " << app->date << "\n";
-                cout << "Instructions: " << app->instructions << "\n";
-                cout << "Doctor ID: " << app->DoctorID << "\n";
-                cout << "-----------------------------------------\n";
-            }
-        }
-        else
+        if (!found)
         {
             cout << "No records found for Patient ID " << id << "\n";
         }
@@ -1460,7 +1886,7 @@ public:
             cout << "No records found for Doctor ID " << id << "\n";
         }
     }
-     bool findPrescription(int id)
+    bool findPrescription(int id)
     {
         PrescriptionNode *current = head;
         while (current != nullptr)
@@ -1482,18 +1908,98 @@ public:
         return false;
     }
 };
+class Admin
+{
+private:
+    AdminNode *head;
+    AdminNode *tail;
+
+public:
+    Admin() : head(nullptr), tail(nullptr) {}
+    ~Admin()
+    {
+        AdminNode *current = head;
+        while (current != nullptr)
+        {
+            AdminNode *next = current->next;
+            delete current;
+            current = next;
+        }
+        head = nullptr;
+        tail = nullptr;
+    }
+    void addAdmin(const AdminNode &admin)
+    {
+        AdminNode *newAdmin = new AdminNode(admin);
+        if (!head)
+        {
+            head = newAdmin;
+            tail = newAdmin;
+        }
+        else
+        {
+            tail->next = newAdmin;
+            tail = newAdmin;
+        }
+    }
+    bool findAdmin(int id)
+    {
+        AdminNode *current = head;
+        while (current != nullptr)
+        {
+            if (current->AdminID == id)
+            {
+                cout << "---------------------------------------------\n";
+                cout << "Admin found: " << "\n";
+                cout << "Admin ID: " << current->AdminID << "\n";
+                cout << "Name: " << current->name << "\n";
+                cout << "---------------------------------------------\n";
+                return true;
+            }
+            current = current->next;
+        }
+        cout << "Admin not found.\n";
+        return false;
+    }
+    void displayAdmin() const
+    {
+        AdminNode *current = head;
+        while (current)
+        {
+            cout << "---------------------------------------------\n";
+            cout << "Admin ID: " << current->AdminID << "\n";
+            cout << "Name: " << current->name << "\n";
+            cout << "---------------------------------------------\n";
+            current = current->next;
+        }
+    }
+};
 static int callback(void *data, int argc, char **argv, char **azColName);
 void initializedDatabase(sqlite3 *db);
 void loadDepartmentInfo();
 void loadInsuranceInfo();
+// Patients insert, update, select and delete function
 void loadPatientInfo();
 void InsertPatientInfo(PatientNode *patient, const string &username);
+void UpdatePatientInfo(PatientNode *patient);
+void DeletePatientInfo(int PatientID);
+// Users insert, update, select and delete function
 void loadUserInfo();
 void InsertUserInfo(UserNode *user);
+void UpdateUserInfo(UserNode *user);
+void DeleteUserInfo(int UserID);
+// Doctors insert, update, select and delete function
 void loadDoctorInfo();
 void InsertDoctorInfo(DoctorNode *doctor, const string &username, const string &department);
+void UpdateDoctorInfo(DoctorNode *doctor, const string &deptName);
+void DeleteDoctorInfo(int DoctorID);
+// Admin insert, select function
+void loadAdminInfo();
+void InsertAdminInfo(AdminNode *admin, const string &username);
+//Allergies load, insert function
 void InsertAllergyPatient(int Patientid, int Allergyid);
 void loadAllergies();
+//Emergency contact load and insert function
 void InsertEmergencyInfo(EmergencyContactNode *ec);
 void loadEmergencyContactInfo();
 void InsertMedicalRecords(MedicalRecordsNode *record);
@@ -1504,12 +2010,16 @@ void loadPatientAddress();
 void loadServiceInfo();
 void InsertAppointmentInfo(AppointmentNode *appointment);
 void loadAppointmentInfo();
+void UpdateAppointmentInfo(AppointmentNode *appointment);
 bool updateAppointmentStatus(sqlite3 *db, int appointmentID);
 void deleteAppointment(int id);
 void InsertPaymentInfo(PaymentNode *payment);
 void loadPaymentInfo();
 void InsertFeedbackInfo(FeedbackNode *feedback);
 void loadFeedbackInfo();
+void InsertMedicineInfo(MedicineNode *medicine);
+void UpdateMedicineInfo(MedicineNode *medicine);
+void DeleteMedicineInfo(int MedicineID);
 void loadMedicineInfo();
 int InsertPrescriptionInfo(PrescriptionNode *prescription);
 void loadPrescriptionInfo();
@@ -1531,6 +2041,7 @@ Payment PaymentList;
 Feedback FeedbackList;
 Medicine MedicineList;
 Prescription PrescriptionList;
+Admin AdminList;
 
 static int callback(void *data, int argc, char **argv, char **azColName)
 {
@@ -1715,7 +2226,7 @@ void initializedDatabase(sqlite3 *db)
         cout << "Table initialize successfully.\n";
     }
     // Feedback table
-    string feedbackTable("CREATE TABLE IF NOT EXISTS Feedback (FeedbackID INTEGER PRIMARY KEY AUTOINCREMENT,Describe TEXT NOT NULL,Rating INTEGER NOT NULL, PatientID INTEGER NOT NULL, AppointmentID INTEGER NOT NULL, DoctorID INTEGER NOT NULL, FOREIGN KEY (PatientID) REFERENCES Patient(id), FOREIGN KEY (AppointmentID) REFERENCES Appointment(AppointmentID), FOREIGN KEY (DoctorID) REFERENCES Doctor(id));");
+    string feedbackTable("CREATE TABLE IF NOT EXISTS Feedback (FeedbackID INTEGER PRIMARY KEY AUTOINCREMENT,Describe TEXT NOT NULL,Rating INTEGER NOT NULL, PatientID INTEGER NOT NULL, AppointmentID INTEGER NOT NULL UNIQUE, DoctorID INTEGER NOT NULL, FOREIGN KEY (PatientID) REFERENCES Patient(id), FOREIGN KEY (AppointmentID) REFERENCES Appointment(AppointmentID), FOREIGN KEY (DoctorID) REFERENCES Doctor(id));");
     if (sqlite3_exec(db, feedbackTable.c_str(), nullptr, nullptr, &messageError) != SQLITE_OK)
     {
         cerr << "Error creating table: " << messageError;
@@ -1750,6 +2261,17 @@ void initializedDatabase(sqlite3 *db)
     // Prescription Medicine table
     string prescriptionMedicineTable("CREATE TABLE IF NOT EXISTS Prescription_Medicine (PrescriptionID INTEGER NOT NULL, MedicineID INTEGER NOT NULL, FOREIGN KEY (PrescriptionID) REFERENCES Prescription(PrescriptionID), FOREIGN KEY (MedicineID) REFERENCES Medicine(MedicineID));");
     if (sqlite3_exec(db, prescriptionMedicineTable.c_str(), nullptr, nullptr, &messageError) != SQLITE_OK)
+    {
+        cerr << "Error creating table: " << messageError;
+        sqlite3_free(messageError);
+    }
+    else
+    {
+        cout << "Table initialize successfully.\n";
+    }
+     // Admin table
+    string adminTable("CREATE TABLE IF NOT EXISTS Admin (id INTEGER PRIMARY KEY AUTOINCREMENT, A_Name TEXT NOT NULL UNIQUE, UserID INTEGER NOT NULL, FOREIGN KEY (UserID) REFERENCES users(id));");
+    if (sqlite3_exec(db, adminTable.c_str(), nullptr, nullptr, &messageError) != SQLITE_OK)
     {
         cerr << "Error creating table: " << messageError;
         sqlite3_free(messageError);
@@ -1838,7 +2360,8 @@ void loadUserInfo()
 {
     sqlite3 *DB;
     sqlite3_stmt *stmt;
-    const char *sql = "SELECT id,username,password,phonenumber,IC FROM users;";
+    const char *sql = "SELECT id,username,password,phonenumber,IC, role FROM users;";
+    UserList.clear();
     int exit = sqlite3_open("medical_appointment_system.db", &DB);
     if (exit != SQLITE_OK)
     {
@@ -1860,7 +2383,8 @@ void loadUserInfo()
         string password = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 2));
         string phonenumber = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 3));
         string IC = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 4));
-        UserNode *user = new UserNode(username, password, phonenumber, IC);
+        string role = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 5));
+        UserNode *user = new UserNode(username, password, phonenumber, IC, role);
         user->setID(id);
         UserList.addUser(*user);
     }
@@ -1881,7 +2405,7 @@ void InsertUserInfo(UserNode *user)
         return;
     }
 
-    const char *sql = "INSERT INTO users(username, password, phonenumber, IC) VALUES (?, ?, ?, ?);";
+    const char *sql = "INSERT INTO users(username, password, phonenumber, IC, role) VALUES (?, ?, ?, ?, ?);";
     exit = sqlite3_prepare_v2(DB, sql, -1, &stmt, NULL);
     if (exit != SQLITE_OK)
     {
@@ -1894,6 +2418,7 @@ void InsertUserInfo(UserNode *user)
     sqlite3_bind_text(stmt, 2, user->password.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, user->phonenumber.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 4, user->ic.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 5, user->role.c_str(), -1, SQLITE_STATIC);
 
     exit = sqlite3_step(stmt);
     if (exit != SQLITE_DONE)
@@ -1904,6 +2429,83 @@ void InsertUserInfo(UserNode *user)
     user->setID(id);
 
     UserList.addUser(*user);
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(DB);
+}
+// Admin used to update user info
+void UpdateUserInfo(UserNode *user)
+{
+    sqlite3 *DB;
+    sqlite3_stmt *stmt;
+    char *messageError;
+    int exit = sqlite3_open("medical_appointment_system.db", &DB);
+    string sql = "UPDATE users SET username = ?, password = ?, phonenumber = ?, IC = ? WHERE id = ?;";
+
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    if (sqlite3_prepare_v2(DB, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        cerr << "Failed to prepare statement: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    sqlite3_bind_text(stmt, 1, user->username.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, user->password.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, user->phonenumber.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, user->ic.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 5, user->id);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+    {
+        cerr << "Failed to update user: " << sqlite3_errmsg(DB) << endl;
+    }
+    else
+    {
+        cout << "User information updated successfully in database.\n";
+
+        UserList.updateUser(user);
+
+        sqlite3_close(DB);
+        sqlite3_finalize(stmt);
+    }
+}
+// Delete user info
+void DeleteUserInfo(int UserID)
+{
+    sqlite3 *DB;
+    sqlite3_stmt *stmt;
+    char *messageError;
+    int exit = sqlite3_open("medical_appointment_system.db", &DB);
+    string sql = "DELETE FROM users WHERE id = ?;";
+
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    if (sqlite3_prepare_v2(DB, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        cerr << "Failed to prepare statement: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+    sqlite3_bind_int(stmt, 1, UserID);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+    {
+        cerr << "Error executing delete statement: " << sqlite3_errmsg(DB) << endl;
+        sqlite3_finalize(stmt);
+        sqlite3_close(DB);
+        return;
+    }
+
+    cout << "User with ID " << UserID << " deleted from database.\n";
+    UserList.deleteUser(UserID);
 
     sqlite3_finalize(stmt);
     sqlite3_close(DB);
@@ -1994,6 +2596,82 @@ void InsertPatientInfo(PatientNode *patient, const string &username)
     sqlite3_finalize(stmt);
     sqlite3_close(DB);
 }
+// Update patient info
+void UpdatePatientInfo(PatientNode *patient)
+{
+    sqlite3 *DB;
+    sqlite3_stmt *stmt;
+    char *messageError;
+    int exit = sqlite3_open("medical_appointment_system.db", &DB);
+    string sql = "UPDATE Patient SET P_Name = ?, P_Age = ?, P_Gender = ? WHERE id = ?;";
+
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    if (sqlite3_prepare_v2(DB, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        cerr << "Failed to prepare statement: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    sqlite3_bind_text(stmt, 1, patient->name.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 2, patient->age);
+    sqlite3_bind_text(stmt, 3, patient->gender.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 4, patient->id);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+    {
+        cerr << "Failed to update user: " << sqlite3_errmsg(DB) << endl;
+    }
+    else
+    {
+        cout << "Patient information updated successfully in database.\n";
+
+        PatientList.updatePatient(patient);
+
+        sqlite3_close(DB);
+        sqlite3_finalize(stmt);
+    }
+}
+// Delete patient info
+void DeletePatientInfo(int PatientID)
+{
+    sqlite3 *DB;
+    sqlite3_stmt *stmt;
+    char *messageError;
+    int exit = sqlite3_open("medical_appointment_system.db", &DB);
+    string sql = "DELETE FROM Patient WHERE id = ?;";
+
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    if (sqlite3_prepare_v2(DB, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        cerr << "Failed to prepare statement: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+    sqlite3_bind_int(stmt, 1, PatientID);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+    {
+        cerr << "Error executing delete statement: " << sqlite3_errmsg(DB) << endl;
+        sqlite3_finalize(stmt);
+        sqlite3_close(DB);
+        return;
+    }
+
+    cout << "Patient with ID " << PatientID << " deleted from database.\n";
+    PatientList.deletePatient(PatientID);
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(DB);
+}
 // Insert Doctor info into database
 void InsertDoctorInfo(DoctorNode *doctor, const string &username, const string &department)
 {
@@ -2042,7 +2720,7 @@ void InsertDoctorInfo(DoctorNode *doctor, const string &username, const string &
     doctor->setID(id);
 
     DoctorList.addDoctor(*doctor);
-
+    DoctorList.findDoctor(doctor->doctorID);
     // Finalize the SQL statement and close the database connection
     sqlite3_finalize(stmt);
     sqlite3_close(DB);
@@ -2079,6 +2757,163 @@ void loadDoctorInfo()
         doctor->setID(id);
         DoctorList.addDoctor(*doctor);
     }
+    sqlite3_finalize(stmt);
+    sqlite3_close(DB);
+}
+// Update doctor info
+void UpdateDoctorInfo(DoctorNode *doctor, const string &deptName)
+{
+    sqlite3 *DB;
+    sqlite3_stmt *stmt;
+    char *messageError;
+    int exit = sqlite3_open("medical_appointment_system.db", &DB);
+    string sql = "UPDATE Doctor SET D_Name = ?, D_Age = ?, Specialty = ?, D_Gender = ?, Departmentid = (SELECT id FROM Department WHERE Department_Name = ?) WHERE id = ?;";
+
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    if (sqlite3_prepare_v2(DB, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        cerr << "Failed to prepare statement: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    sqlite3_bind_text(stmt, 1, doctor->name.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 2, doctor->age);
+    sqlite3_bind_text(stmt, 3, doctor->specialty.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, doctor->gender.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 5, deptName.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 6, doctor->doctorID);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+    {
+        cerr << "Failed to update doctor: " << sqlite3_errmsg(DB) << endl;
+    }
+    else
+    {
+        cout << "Doctor information updated successfully in database.\n";
+
+        DoctorList.updateDoctor(doctor);
+
+        sqlite3_close(DB);
+        sqlite3_finalize(stmt);
+    }
+}
+// Delete doctor info
+void DeleteDoctorInfo(int DoctorID)
+{
+    sqlite3 *DB;
+    sqlite3_stmt *stmt;
+    char *messageError;
+    int exit = sqlite3_open("medical_appointment_system.db", &DB);
+    string sql = "DELETE FROM Doctor WHERE id = ?;";
+
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    if (sqlite3_prepare_v2(DB, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        cerr << "Failed to prepare statement: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+    sqlite3_bind_int(stmt, 1, DoctorID);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+    {
+        cerr << "Error executing delete statement: " << sqlite3_errmsg(DB) << endl;
+        sqlite3_finalize(stmt);
+        sqlite3_close(DB);
+        return;
+    }
+
+    cout << "Doctor with ID " << DoctorID << " deleted from database.\n";
+    DoctorList.deleteDoctor(DoctorID);
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(DB);
+}
+//load admin info into linkedlist
+void loadAdminInfo()
+{
+    sqlite3 *DB;
+    sqlite3_stmt *stmt;
+    const char *sql = "SELECT id, A_Name, UserID FROM Admin;";
+    int exit = sqlite3_open("medical_appointment_system.db", &DB);
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    if (sqlite3_prepare_v2(DB, sql, -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        cerr << "Error preparing statement: " << sqlite3_errmsg(DB) << endl;
+        sqlite3_close(DB);
+        return;
+    }
+    while (sqlite3_step(stmt) == SQLITE_ROW)
+    {
+        int id = sqlite3_column_int(stmt, 0);
+        string Name = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 1));
+        int userid = sqlite3_column_int(stmt, 2);
+        AdminNode *admin = new AdminNode(Name, userid);
+        admin->setID(id);
+        AdminList.addAdmin(*admin);
+    }
+    sqlite3_finalize(stmt);
+    sqlite3_close(DB);
+}
+//Insert admin info into database
+void InsertAdminInfo(AdminNode *admin, const string &username)
+{
+    sqlite3 *DB;
+
+    // Open the database connection
+    int exit = sqlite3_open("medical_appointment_system.db", &DB);
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    // SQL query to insert doctor information
+    const char *sql = R"(
+        INSERT INTO Admin (A_Name, UserID)
+        VALUES (?, (SELECT id FROM users WHERE username = ?));
+    )";
+
+    sqlite3_stmt *stmt;
+
+    // Prepare the SQL statement
+    if (sqlite3_prepare_v2(DB, sql, -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        cerr << "Error preparing statement: " << sqlite3_errmsg(DB) << endl;
+        sqlite3_close(DB);
+        return;
+    }
+
+    // Bind parameters to the SQL statement
+    sqlite3_bind_text(stmt, 1, admin->name.c_str(), -1, SQLITE_STATIC);      // Bind doctor name                                  // Bind doctor age
+    sqlite3_bind_text(stmt, 2, username.c_str(), -1, SQLITE_STATIC); // Bind specialty
+       // Bind department name
+
+    // Execute the SQL statement
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+    {
+        cerr << "Error inserting admin information: " << sqlite3_errmsg(DB) << endl;
+    }
+    int id = sqlite3_last_insert_rowid(DB);
+    admin->setID(id);
+
+    AdminList.addAdmin(*admin);
+    AdminList.findAdmin(admin->AdminID);
+    // Finalize the SQL statement and close the database connection
     sqlite3_finalize(stmt);
     sqlite3_close(DB);
 }
@@ -2621,6 +3456,47 @@ bool updateAppointmentStatus(sqlite3 *db, int appointmentID)
     sqlite3_finalize(updateStmt);
     return success;
 }
+//Update appointment info
+void UpdateAppointmentInfo(AppointmentNode *appointment)
+{
+    sqlite3 *DB;
+    sqlite3_stmt *stmt;
+    char *messageError;
+    int exit = sqlite3_open("medical_appointment_system.db", &DB);
+    string sql = "UPDATE Appointment SET Date = ?, Time = ?, DoctorID = ?, ServiceID = ? WHERE AppointmentID = ?;";
+
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    if (sqlite3_prepare_v2(DB, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        cerr << "Failed to prepare statement: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    sqlite3_bind_text(stmt, 1, appointment->date.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, appointment->time.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 3, appointment->DoctorID);
+    sqlite3_bind_int(stmt, 4, appointment->ServiceID);
+    sqlite3_bind_int(stmt, 5, appointment->AppointmentID);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+    {
+        cerr << "Failed to update Appointment: " << sqlite3_errmsg(DB) << endl;
+    }
+    else
+    {
+        cout << "Appointment information updated successfully in database.\n";
+
+        AppointmentList.updateAppointment(appointment);
+
+        sqlite3_close(DB);
+        sqlite3_finalize(stmt);
+    }
+}
 // Cancel Appointment function
 void deleteAppointment(int id)
 {
@@ -2659,6 +3535,9 @@ void deleteAppointment(int id)
     {
         cout << "Appointment with ID " << id << " deleted successfully.\n";
     }
+
+    cout << "Appointment with ID " << id << " deleted from database.\n";
+    AppointmentList.deleteAppointment(id);
 
     // Finalize the statement and close the database connection
     sqlite3_finalize(stmt);
@@ -2875,6 +3754,139 @@ void loadMedicineInfo()
     sqlite3_finalize(stmt);
     sqlite3_close(db);
 }
+void InsertMedicineInfo(MedicineNode *medicine)
+{
+    sqlite3 *db;
+    sqlite3_stmt *stmt;
+    int exit = sqlite3_open("medical_appointment_system.db", &db);
+
+    // Check if the database opened successfully
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+
+    // SQL query to insert into the Payment table
+    const char *sql = R"(
+        INSERT INTO Medicine (Name, Description)
+        VALUES (?, ?);
+    )";
+
+    // Prepare the SQL statement
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
+        sqlite3_close(db);
+        return;
+    }
+
+    // Bind parameters to the SQL statement
+    sqlite3_bind_text(stmt, 1, medicine->name.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, medicine->description.c_str(), -1, SQLITE_STATIC);
+
+    // Execute the SQL statement
+    int result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE)
+    {
+        cerr << "Error inserting medicine information: " << sqlite3_errmsg(db) << endl;
+    }
+    else
+    {
+        int id = sqlite3_last_insert_rowid(db);
+        medicine->setID(id);
+
+        MedicineList.addMedicine(*medicine);
+        cout << "Payment information inserted successfully.\n";
+    }
+
+    // Finalize the statement and close the database connection
+    sqlite3_finalize(stmt); // Finalize stmt first
+    sqlite3_close(db);      // Then close the database
+}
+void UpdateMedicineInfo(MedicineNode *medicine)
+{
+    sqlite3 *DB;
+    sqlite3_stmt *stmt;
+    char *messageError;
+    int exit = sqlite3_open("medical_appointment_system.db", &DB);
+    string sql = "UPDATE Medicine SET Name = ?, Description = ? WHERE MedicineID = ?;";
+
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    if (sqlite3_prepare_v2(DB, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        cerr << "Failed to prepare statement: " << sqlite3_errmsg(DB) << endl;
+        return;
+    }
+
+    sqlite3_bind_text(stmt, 1, medicine->name.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, medicine->description.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 3, medicine->MedicineID);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE)
+    {
+        cerr << "Failed to update Appointment: " << sqlite3_errmsg(DB) << endl;
+    }
+    else
+    {
+        cout << "Medicine information updated successfully in database.\n";
+
+        MedicineList.updateMedicine(medicine);
+
+        sqlite3_close(DB);
+        sqlite3_finalize(stmt);
+    }
+}
+void DeleteMedicineInfo(int MedicineID)
+{
+    sqlite3 *db;
+    sqlite3_stmt *stmt;
+
+    // Open database
+    int exit = sqlite3_open("medical_appointment_system.db", &db);
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+
+    // SQL query to delete appointment by AppointmentID
+    const char *sql = "DELETE FROM Medicine WHERE MedicineID = ?;";
+
+    // Prepare the SQL statement
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)
+    {
+        cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
+        sqlite3_close(db);
+        return;
+    }
+
+    // Bind the AppointmentID parameter
+    sqlite3_bind_int(stmt, 1, MedicineID);
+
+    // Execute the SQL statement
+    int result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE)
+    {
+        cerr << "Error deleting Medicine: " << sqlite3_errmsg(db) << endl;
+    }
+    else
+    {
+        cout << "Medicine with ID " << MedicineID << " deleted successfully.\n";
+    }
+
+    cout << "Medicine with ID " << MedicineID << " deleted from database.\n";
+    AppointmentList.deleteAppointment(MedicineID);
+
+    // Finalize the statement and close the database connection
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+}
 int InsertPrescriptionInfo(PrescriptionNode *prescription)
 {
     int id;
@@ -2926,7 +3938,7 @@ int InsertPrescriptionInfo(PrescriptionNode *prescription)
     // Finalize the statement and close the database connection
     sqlite3_finalize(stmt); // Finalize stmt first
     sqlite3_close(db);
-    return id;      // Then close the database
+    return id; // Then close the database
 }
 void loadPrescriptionInfo()
 {
@@ -3016,7 +4028,7 @@ void deleteFunction()
         return;
     }
 
-    const char *sql = "DROP TABLE Prescription_Medicine;";
+    const char *sql = ";";
 
     // Prepare the SQL statement
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)

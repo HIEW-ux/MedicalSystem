@@ -1,15 +1,14 @@
 #include "function_insert_user.h"
 using namespace std;
 
-void publicSignin();
-bool checkUserName(string username);
-bool checkIc(string ic);
-bool checkPhoneNumber(string phonenumber);
+void publicSignin(const string &role);
+bool checkUserName(const string &username);
+bool checkIc(const string &ic);
+bool checkPhoneNumber(const string &phonenumber);
 void signIn();
 void logIn();
 void patientPlatForm();
 void information();
-void checkMedicalRecord();
 void bookingAppointment();
 void appointmentStatus();
 void insertPatientProfileInfo();
@@ -48,9 +47,16 @@ void prescriptionPlatform();
 void insertPrescription();
 void selectMedicine(int PrescriptionID);
 void displayPrescriptionWithMedicines(int prescriptionID);
+void adminPlatform();
+void userPlatform();
+void patientPlatform();
+void doctorPlatform();
+void appointmentPlatform();
+void medicinePlatform();
 
 void signIn()
 {
+    string role;
     while (true)
     {
         cout << "---------------------Register Platform-----------------------------\n";
@@ -60,13 +66,16 @@ void signIn()
         switch (choice)
         {
         case 1:
-            publicSignin();
+            role = "admin";
+            publicSignin(role);
             break;
         case 2:
-            publicSignin();
+            role = "doctor";
+            publicSignin(role);
             break;
         case 3:
-            publicSignin();
+            role = "patient";
+            publicSignin(role);
             break;
         case 4:
             cout << "Exit\n";
@@ -76,9 +85,10 @@ void signIn()
         }
     }
 }
-void publicSignin()
+void publicSignin(const string &role)
 {
     UserNode *user = new UserNode();
+    user->role = role;
     bool flag;
     while (true)
     {
@@ -101,7 +111,7 @@ void publicSignin()
         cout << "Please enter your password:\n";
         user->password = getValidatedStringInput("Please enter valid password: ");
         cout << "Confirm password\n";
-        getline(cin, confirmpassword);
+        confirmpassword = getValidatedStringInput("Please enter valid password: ");
         if (user->password == confirmpassword)
         {
             cout << "valid password\n";
@@ -143,8 +153,9 @@ void publicSignin()
         }
     }
     InsertUserInfo(user);
+    cout << "Registration successful as " << role << "!\n";
 }
-bool checkUserName(string username)
+bool checkUserName(const string &username)
 {
     int len = username.length();
     if (len < 3 || len > 15)
@@ -173,7 +184,7 @@ bool checkUserName(string username)
     }
     return count > 0;
 }
-bool checkIc(string ic)
+bool checkIc(const string &ic)
 {
     int len = ic.length();
     if (len != 12)
@@ -191,7 +202,7 @@ bool checkIc(string ic)
     }
     return true;
 }
-bool checkPhoneNumber(string phonenumber)
+bool checkPhoneNumber(const string &phonenumber)
 {
     int len = phonenumber.length();
     if (len < 10)
@@ -213,6 +224,7 @@ void logIn()
     string username;
     string password;
     int choice;
+    string role;
     bool flag = true;
     while (flag)
     {
@@ -223,12 +235,15 @@ void logIn()
         {
         case 1:
             flag = false;
+            role = "admin";
             break;
         case 2:
             flag = false;
+            role = "doctor";
             break;
         case 3:
             flag = false;
+            role = "patient";
             break;
         case 4:
             return;
@@ -240,19 +255,23 @@ void logIn()
     username = getValidatedStringInput("Invalid input, please try again: ");
     cout << "Please enter password\n";
     password = getValidatedStringInput("Invalid input, please try again: ");
-    if (UserList.loginAuth(username, password) && choice == 3)
+    if (UserList.loginAuth(username, password, role))
     {
-        cout << "Patient login success!\n";
-        patientPlatForm();
-    }
-    else if (UserList.loginAuth(username, password) && choice == 2)
-    {
-        cout << "Doctor login success!\n";
-        showDoctorDashboard();
-    }
-    else if (UserList.loginAuth(username, password) && choice == 1)
-    {
-        cout << "Admin login success!\n";
+        if (role == "patient")
+        {
+            cout << "Patient login success!\n";
+            patientPlatForm();
+        }
+        else if (role == "doctor")
+        {
+            cout << "Doctor login success!\n";
+            showDoctorDashboard();
+        }
+        else if (role == "admin")
+        {
+            cout << "Admin login success!\n";
+            adminPlatform();
+        }
     }
     else
     {
@@ -262,6 +281,7 @@ void logIn()
 // Patient Platform
 void patientPlatForm()
 {
+    int PatientID;
     int choice;
     while (true)
     {
@@ -275,7 +295,9 @@ void patientPlatForm()
             information();
             break;
         case 2:
-            checkMedicalRecord();
+            cout << "Please enter your Patient ID: ";
+            PatientID = getValidatedNumericInput("Please enter valid ID: ");
+            recordList.displayPatientMedicalRecords(PatientID);
             break;
         case 3:
             bookingAppointment();
@@ -624,50 +646,26 @@ void EmergencyPlatform()
 void insertEmergencyContact()
 {
     EmergencyContactNode *ec = new EmergencyContactNode();
-    int choice;
     while (true)
     {
-        cout << "First Time insert emergency contact info?(0/1)(0 for first time): ";
-        choice = getValidatedNumericInput("Please enter valid choice: ");
-        if (choice == 1)
+        cout << "Please enter your Patient ID(0 fro exit): ";
+        ec->patientid = getValidatedNumericInput("Invalid input, Please enter a valid ID: ");
+        if (!PatientList.findPatient(ec->patientid))
         {
-            break;
-        }
-        else if (choice == 0)
-        {
-            cout << "Please enter your Patient ID: ";
-            ec->patientid = getValidatedNumericInput("Invalid input, Please enter a valid ID: ");
-            if (!PatientList.findPatient(ec->patientid))
-            {
-                return;
-            }
-            cout << "Please enter Contact name: ";
-            ec->contactName = getValidatedStringInput("Invalid input, please try again!\n");
-            cout << "Please enter phone number: ";
-            ec->phoneNumber = getValidatedStringInput("Invalid input, please try again!\n");
-            cout << "Please enter Relationship: ";
-            ec->relationShip = getValidatedStringInput("Invalid input, please try again!\n");
-            InsertEmergencyInfo(ec);
-            break;
-        }
-        else
-        {
-            cout << "Invalid input, please try again!\n";
-            continue;
-        }
-    }
-    while (true)
-    {
-        int id;
-        cout << "Please enter contact ID to get emergency contact Info (0 for exit): ";
-        id = getValidatedNumericInput("Invalid input. Please enter a valid numeric Patient ID:");
-        if (id == 0)
-        {
-            cout << "Exiting...\n";
             return;
         }
-        EmergencyContactList.findEmergencyContact(id);
-        return;
+        else if (ec->patientid == 0)
+        {
+            cout << "Exiting...\n";
+        }
+        cout << "Please enter Contact name: ";
+        ec->contactName = getValidatedStringInput("Invalid input, please try again!\n");
+        cout << "Please enter phone number: ";
+        ec->phoneNumber = getValidatedStringInput("Invalid input, please try again!\n");
+        cout << "Please enter Relationship: ";
+        ec->relationShip = getValidatedStringInput("Invalid input, please try again!\n");
+        InsertEmergencyInfo(ec);
+        break;
     }
 }
 // Insurance platform
@@ -925,42 +923,7 @@ void insertAddress()
         InsertPatientAddress(address);
     }
 }
-// Checking medical records function
-void checkMedicalRecord()
-{
-    int PatientID;
-    vector<MedicalRecordsNode *> Records;
-    while (true)
-    {
-        cout << "Please enter your Patient ID: ";
-        PatientID = getValidatedNumericInput("Please enter valid ID: ");
-        if (PatientList.findPatient(PatientID))
-        {
-            Records = recordList.findRecords(PatientID);
-            if (!Records.empty())
-            {
-                cout << "Found Records for Patient ID " << PatientID << ":\n";
-                for (const auto &record : Records)
-                {
-                    cout << "------------------------------------------\n";
-                    cout << "Record ID: " << record->recordID << "\n"
-                         << "Date: " << record->date << "\n"
-                         << "Details: " << record->details << "\n"
-                         << "Doctor ID: " << record->doctorID << "\n"
-                         << "Patient ID: " << record->patientID << "\n";
-                    cout << "------------------------------------------\n";
-                    return;
-                }
-            }
-            else
-            {
-                cout << "No records found for Patient ID " << PatientID << "\n";
-            }
-        }
-        return;
-    }
-}
-// Booking medical records function
+// Booking appointment function
 void bookingAppointment()
 {
     int choice, PatientID, DoctorID, ServiceID;
@@ -1159,10 +1122,16 @@ void appointmentStatus()
             int choice;
             cout << "Please enter your patient ID: ";
             PatientID = getValidatedNumericInput("Please enter valid choice: ");
-            AppointmentList.displayPatientAppointments(PatientID);
-            cout << "Please enter the appointment ID you want to delete: ";
-            choice = getValidatedNumericInput("Please enter valid choice: ");
-            deleteAppointment(choice);
+            if (AppointmentList.displayPatientPendingAppointments(PatientID))
+            {
+                cout << "Please enter the appointment ID you want to delete: ";
+                choice = getValidatedNumericInput("Please enter valid choice: ");
+                deleteAppointment(choice);
+            }
+            else
+            {
+                cout << "No pending appointments found. Deletion skipped.\n";
+            }
             break;
         case 3:
             paymentFunction();
@@ -1183,17 +1152,24 @@ void paymentFunction()
     int AppointmentID;
     cout << "Please enter your patient ID to get your appointment list: ";
     PatientID = getValidatedNumericInput("Please enter valid choice: ");
-    AppointmentList.findAppointment(PatientID);
-    cout << "Please enter an appointment you want to pay: ";
-    AppointmentID = getValidatedNumericInput("Please enter valid choice: ");
-    paymentProcess(AppointmentID);
+    if (AppointmentList.displayPatientPendingAppointments(PatientID))
+    {
+        cout << "Please enter an appointment you want to pay: ";
+        AppointmentID = getValidatedNumericInput("Please enter valid choice: ");
+        paymentProcess(AppointmentID);
+    }
+    else
+    {
+        cout << "No pending appointments found. Payment skipped.\n";
+        return;
+    }
 }
 void paymentProcess(int ID)
 {
     sqlite3 *db = nullptr;
     sqlite3_stmt *stmt = nullptr;
     string date, times;
-    char choice;
+    string choice;
 
     if (sqlite3_open("medical_appointment_system.db", &db) != SQLITE_OK)
     {
@@ -1229,16 +1205,16 @@ void paymentProcess(int ID)
         cout << fixed << setprecision(2) << "Price: RM" << price << "\n";
 
         cout << "Do you have insurance?(Y/N): ";
-        choice = getValidatedNumericInput("Please enter valid choice: ");
+        choice = getValidatedStringInput("Please enter valid choice: ");
 
-        if (toupper(choice) == 'Y')
+        if (choice == "Y")
         {
             int insuranceID;
             cout << "Enter your insurance ID: ";
             insuranceID = getValidatedNumericInput("Please enter valid choice: ");
             price = insuranceProcess(patientID, insuranceID, db, price);
         }
-        else if (toupper(choice) != 'N')
+        else if (choice != "N")
         {
             cout << "Invalid choice. Please try again.\n";
             sqlite3_close(db);
@@ -1397,7 +1373,6 @@ void giveFeedback()
             if (AppointmentList.findAppointment(AppointmentID))
             {
                 cout << "Please enter describe: ";
-                cin.ignore();
                 describe = getValidatedStringInput("Please enter valid describe: ");
                 cout << "Please enter rating (1-5): ";
                 rating = getValidatedNumericInput("Please enter valid rating: ");
@@ -1422,7 +1397,7 @@ void showDoctorDashboard()
     {
         cout << "-----Welcome to Doctor service platform!-----\n"
              << "---------Please select your service.----------\n";
-        cout << "1. Me \n2. Medical Records \n3. Check appointment status\n4. Prescription\n5. Exit";
+        cout << "1. Me \n2. Medical Records \n3. Check appointment status\n4. Prescription\n5. My Feedback\n6. Exit";
         choice = getValidatedNumericInput("Please enter valid choice: ");
         switch (choice)
         {
@@ -1439,6 +1414,12 @@ void showDoctorDashboard()
             prescriptionPlatform();
             break;
         case 5:
+            int DoctorID;
+            cout << "Please enter your doctor ID: ";
+            DoctorID = getValidatedNumericInput("Please enter valid ID: ");
+            FeedbackList.displayDoctorFeedback(DoctorID);
+            break;
+        case 6:
             return;
         default:
             cout << "Invalid choice\n";
@@ -1514,12 +1495,12 @@ void insertDoctorProfileInfo()
 
             if (DepartmentList.exists(department))
             {
-                cout << "department valid.";
+                cout << "department valid.\n";
                 break;
             }
             else
             {
-                cout << "Invalid Department, try again!";
+                cout << "Invalid Department, try again!\n";
             }
         }
         InsertDoctorInfo(d, username, department);
@@ -1548,27 +1529,9 @@ void medicalRecordsPlatForm()
             break;
         case 2:
             int id;
-            cout << "Please enter patient ID: ";
+            cout << "Please enter Doctor ID: ";
             id = getValidatedNumericInput("Please enter valid choice: ");
-            Records = recordList.findRecords(id);
-            if (!Records.empty())
-            {
-                cout << "Found Records for Patient ID " << id << ":\n";
-                for (const auto &record : Records)
-                {
-                    cout << "------------------------------------------\n";
-                    cout << "Record ID: " << record->recordID << "\n"
-                         << "Date: " << record->date << "\n"
-                         << "Details: " << record->details << "\n"
-                         << "Doctor ID: " << record->doctorID << "\n"
-                         << "Patient ID: " << record->patientID << "\n";
-                    cout << "------------------------------------------\n";
-                }
-            }
-            else
-            {
-                cout << "No records found for Patient ID " << id << "\n";
-            }
+            recordList.displayDoctorMedicalRecords(id);
             break;
         case 3:
             return;
@@ -1607,6 +1570,7 @@ void addMedicalRecords()
                     record->date = buf;
                     InsertMedicalRecords(record);
                     cout << "Records insert successfully!\n";
+                    return;
                 }
                 else
                 {
@@ -1723,7 +1687,7 @@ void insertPrescription()
 }
 void selectMedicine(int PrescriptionID)
 {
-    while(true)
+    while (true)
     {
         MedicineList.displayMedicine();
         cout << "Enter medicine ID to add to the prescription (0 for exit): ";
@@ -1731,7 +1695,7 @@ void selectMedicine(int PrescriptionID)
         if (MedicineID == 0)
         {
             cout << "Exiting medicine selection...\n";
-            break; 
+            break;
         }
         if (MedicineList.findMedicine(MedicineID))
         {
@@ -1747,7 +1711,7 @@ void selectMedicine(int PrescriptionID)
 void displayPrescriptionWithMedicines(int prescriptionID)
 {
     sqlite3 *db;
-    string query = 
+    string query =
         "SELECT m.MedicineID, m.Name, m.Description "
         "FROM Prescription_Medicine pm "
         "JOIN Medicine m ON pm.MedicineID = m.MedicineID "
@@ -1762,7 +1726,7 @@ void displayPrescriptionWithMedicines(int prescriptionID)
         return;
     }
 
-    sqlite3_stmt* stmt;
+    sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr) != SQLITE_OK)
     {
         cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
@@ -1780,8 +1744,8 @@ void displayPrescriptionWithMedicines(int prescriptionID)
     {
         hasData = true;
         int medicineID = sqlite3_column_int(stmt, 0);
-        const char* name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-        const char* description = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+        const char *name = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 1));
+        const char *description = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 2));
 
         cout << "Medicine ID: " << medicineID << "\n";
         cout << "Name: " << name << "\n";
@@ -1796,4 +1760,548 @@ void displayPrescriptionWithMedicines(int prescriptionID)
 
     sqlite3_close(db);
     sqlite3_finalize(stmt); // Clean up statement
+}
+void adminPlatform()
+{
+    AdminNode *admin = new AdminNode();
+    int AdminID;
+    int choice;
+    while (true)
+    {
+        cout << "---------------Admin platform-----------------\n"
+             << "---------Please select your service.----------\n";
+        cout << "1. Me \n2. User \n3. Patient \n4. Doctor \n5. appointment \n6. Medicine \n7. Exit";
+        choice = getValidatedNumericInput("Please enter valid choice: ");
+        switch (choice)
+        {
+        case 1:
+            while(true)
+            {
+                string username;
+                cout << "First time login?(0/1)(0 for first time): ";
+                choice = getValidatedNumericInput("Please enter valid choice: ");
+                if(choice == 1)
+                {
+                    break;
+                }
+                cout << "Please enter your name: ";
+                admin->name = getValidatedStringInput("Please enter valid name: ");
+                cout << "Please enter your username associate with the admin: ";
+                username = getValidatedStringInput("Please enter valid input: ");
+                InsertAdminInfo(admin, username);
+                break;
+            }
+            cout << "Please enter your ID: ";
+            AdminID = getValidatedNumericInput("Please enter valid ID: ");
+            AdminList.findAdmin(AdminID);
+            break;
+        case 2:
+            userPlatform();
+            break;
+        case 3:
+            patientPlatform();
+            break;
+        case 4:
+            doctorPlatform();
+            break;
+        case 5:
+            appointmentPlatform();
+            break;
+        case 6:
+            medicinePlatform();
+            break;
+        case 7:
+            return;
+        default:
+            cout << "invalid choice.\n";
+        }
+    }
+}
+// Admin operation
+void userPlatform()
+{
+    UserNode *user = new UserNode();
+    int choice;
+    int UserID;
+    while (true)
+    {
+        cout << "---------------User platform-----------------\n"
+             << "---------Please select your service.----------\n";
+        cout << "1. User Info \n2. Modify user \n3. Delete user \n4. Exit \n";
+        choice = getValidatedNumericInput("Please enter valid choice: ");
+        switch (choice)
+        {
+        case 1:
+            UserList.displayUser();
+            break;
+        case 2:
+            bool flag;
+            cout << "Please enter User ID you want to modify: ";
+            UserID = getValidatedNumericInput("Please enter valid ID: ");
+            if (UserList.findUser(UserID))
+            {
+                user->id = UserID;
+                while (true)
+                {
+                    cout << "Please enter username:\n";
+                    user->username = getValidatedStringInput("Please enter valid username: ");
+                    if (!checkUserName(user->username) || UserList.isDuplicate(user->username))
+                    {
+                        cout << "Username format wrong or duplicate username, please try again\n";
+                        return;
+                    }
+                    else
+                    {
+                        cout << "Username correct.\n";
+                        break;
+                        ;
+                    }
+                }
+                cout << "Please enter password: ";
+                user->password = getValidatedStringInput("Please enter valid password: ");
+                while (true)
+                {
+                    cout << "Please enter your IC:\n";
+                    user->ic = getValidatedStringInput("Please enter valid IC: ");
+                    flag = checkIc(user->ic);
+                    if (flag)
+                    {
+                        cout << "Valid IC\n";
+                        break;
+                    }
+                    else
+                    {
+                        cout << "Invalid IC, please try again.\n";
+                        return;
+                    }
+                }
+                while (true)
+                {
+                    cout << "Please enter your phone number:\n";
+                    user->phonenumber = getValidatedStringInput("Please enter valid phone number: ");
+                    flag = checkPhoneNumber(user->phonenumber);
+                    if (flag)
+                    {
+                        cout << "Valid phone number.\n";
+                        break;
+                    }
+                    else
+                    {
+                        cout << "Invalid phone number, please try again.\n";
+                        return;
+                    }
+                }
+                UpdateUserInfo(user);
+                cout << "Update successfully.\n";
+            }
+            break;
+        case 3:
+            cout << "Please enter your user ID: ";
+            UserID = getValidatedNumericInput("Please enter valid ID: ");
+            if (UserList.findUser(UserID))
+            {
+                string flag;
+                cout << "Your sure you want to delete the user?(N/Y)";
+                flag = getValidatedStringInput("Please enter valid input: ");
+                if (flag == "Y")
+                {
+                    DeleteUserInfo(UserID);
+                }
+                else if (flag == "N")
+                {
+                    cout << "Exiting...\n";
+                    return;
+                }
+                else
+                {
+                    cout << "Invalid input, please try again.\n";
+                }
+            }
+            break;
+        default:
+            cout << "invalid choice.\n";
+        }
+    }
+}
+void patientPlatform()
+{
+    PatientNode *patient = new PatientNode();
+    int choice;
+    int PatientID;
+    while (true)
+    {
+        cout << "---------------Patient Platform-----------------\n"
+             << "---------Please select your service.----------\n";
+        cout << "1. Patient Info \n2. Modify Patient \n3. Delete Patient \n4. Exit\n";
+        choice = getValidatedNumericInput("Please enter valid choice: ");
+        switch (choice)
+        {
+        case 1:
+            PatientList.displayPatients();
+            break;
+        case 2:
+            bool flag;
+            cout << "Please enter patient ID you want to modify: ";
+            PatientID = getValidatedNumericInput("Please enter valid ID: ");
+            if (PatientList.findPatient(PatientID))
+            {
+                patient->id = PatientID;
+                cout << "Please enter patient name: ";
+                patient->name = getValidatedStringInput("Please enter valid input: ");
+                while (true)
+                {
+                    cout << "Please enter age: ";
+                    int age = getValidatedNumericInput("Invalid input. Please enter a valid age (1-150):");
+                    if (age > 0 && age < 150)
+                    {
+                        patient->age = age;
+                        break;
+                    }
+                    cout << "Invalid Age, please try again!\n";
+                }
+                cout << "Please enter the gender: ";
+                patient->gender = getValidatedStringInput("Please enter valid gender: ");
+            }
+            else
+            {
+                cout << "Exiting...\n";
+            }
+            UpdatePatientInfo(patient);
+            cout << "Update success.\n";
+            break;
+        case 3:
+            cout << "Please enter patient ID: ";
+            PatientID = getValidatedNumericInput("Please enter valid ID: ");
+            if (PatientList.findPatient(PatientID))
+            {
+                string flag;
+                cout << "Your sure you want to delete the patient?(N/Y)";
+                flag = getValidatedStringInput("Please enter valid input: ");
+                if (flag == "Y")
+                {
+                    DeletePatientInfo(PatientID);
+                }
+                else if (flag == "N")
+                {
+                    cout << "Exiting...\n";
+                }
+                else
+                {
+                    cout << "Invalid input, please try again.\n";
+                }
+            }
+            break;
+        case 4:
+            return;
+        default:
+            cout << "invalid choice.\n";
+        }
+    }
+}
+void doctorPlatform()
+{
+    DoctorNode *doctor = new DoctorNode();
+    int choice;
+    int DoctorID;
+    string deptName;
+    while (true)
+    {
+        cout << "---------------Doctor Platform-----------------\n"
+             << "---------Please select your service.----------\n";
+        cout << "1. Doctor Info \n2. Modify Doctor \n3. Delete Doctor \n4. Exit\n";
+        choice = getValidatedNumericInput("Please enter valid choice: ");
+        switch (choice)
+        {
+        case 1:
+            cout << "Display doctor sort by age or regularly?(0 for sort by age, 1 for regularly)";
+            choice = getValidatedNumericInput("Please enter valid input: ");
+            if (choice == 0)
+            {
+                DoctorList.bubbleSorting();
+                DoctorList.displayDoctors();
+            }
+            else if (choice == 1)
+            {
+                DoctorList.displayDoctors();
+            }
+            break;
+        case 2:
+            bool flag;
+            cout << "Please enter doctor ID you want to modify: ";
+            DoctorID = getValidatedNumericInput("Please enter valid ID: ");
+            if (DoctorList.findDoctor(DoctorID))
+            {
+                doctor->doctorID = DoctorID;
+                cout << "Please enter doctor name: ";
+                doctor->name = getValidatedStringInput("Please enter valid input: ");
+                while (true)
+                {
+                    cout << "Please enter age: ";
+                    int age = getValidatedNumericInput("Invalid input. Please enter a valid age (1-150):");
+                    if (age > 0 && age < 150)
+                    {
+                        doctor->age = age;
+                        break;
+                    }
+                    cout << "Invalid Age, please try again!\n";
+                }
+                cout << "Please enter the gender: ";
+                doctor->gender = getValidatedStringInput("Please enter valid gender: ");
+                cout << "Please enter the specialty: ";
+                doctor->specialty = getValidatedStringInput("Please enter valid input: ");
+                while (true)
+                {
+                    DepartmentList.printDepartment();
+                    cout << "Enter the department name: ";
+                    deptName = getValidatedStringInput("Please enter valid department: ");
+
+                    if (DepartmentList.exists(deptName))
+                    {
+                        cout << "department valid.\n";
+                        break;
+                    }
+                    else
+                    {
+                        cout << "Invalid Department, try again!\n";
+                    }
+                }
+            }
+            else
+            {
+                cout << "Exiting...\n";
+            }
+            UpdateDoctorInfo(doctor, deptName);
+            cout << "Update success.\n";
+            break;
+        case 3:
+            cout << "Please enter Doctor ID: ";
+            DoctorID = getValidatedNumericInput("Please enter valid ID: ");
+            if (DoctorList.findDoctor(DoctorID))
+            {
+                string flag;
+                cout << "Your sure you want to delete the doctor?(N/Y)";
+                flag = getValidatedStringInput("Please enter valid input: ");
+                if (flag == "Y")
+                {
+                    DeleteDoctorInfo(DoctorID);
+                }
+                else if (flag == "N")
+                {
+                    cout << "Exiting...\n";
+                }
+                else
+                {
+                    cout << "Invalid input, please try again.\n";
+                }
+            }
+            break;
+        case 4:
+            return;
+        default:
+            cout << "invalid choice.\n";
+        }
+    }
+}
+void appointmentPlatform()
+{
+    AppointmentNode *appointment = new AppointmentNode();
+    int choice;
+    int AppointmentID;
+    while (true)
+    {
+        cout << "---------------Appointment Platform-----------------\n"
+             << "---------Please select your service.----------\n";
+        cout << "1. Appointment Info \n2. Modify Appointment \n3. Delete Appointment \n4. Exit\n";
+        choice = getValidatedNumericInput("Please enter valid choice: ");
+        switch (choice)
+        {
+        case 1:
+            cout << "Display Appointment sort by date or regularly?(0 for sort by date, 1 for regularly)";
+            choice = getValidatedNumericInput("Please enter valid input: ");
+            if (choice == 0)
+            {
+                AppointmentList.bubbleSorting();
+                AppointmentList.displayAppointment();
+            }
+            else if (choice == 1)
+            {
+                AppointmentList.displayAppointment();
+            }
+            break;
+        case 2:
+            bool flag;
+            cout << "Please enter Appointment ID you want to modify: ";
+            AppointmentID = getValidatedNumericInput("Please enter valid ID: ");
+            if (AppointmentList.findAppointment(AppointmentID))
+            {
+                appointment->AppointmentID = AppointmentID;
+                cout << "Enter appointment date (YYYY-MM-DD): ";
+                appointment->date = getValidatedStringInput("Please enter valid date: ");
+                if (!isValidDate(appointment->date))
+                {
+                    cout << "Date format wrong!\n";
+                    break;
+                    ;
+                }
+                do
+                {
+                    cout << "Enter appointment time (HH:MM AM/PM): ";
+                    appointment->time = getValidatedStringInput("Please enter valid time: ");
+                    if (!isValidTime(appointment->time))
+                    {
+                        cout << "Invalid time format. Try again.\n";
+                        continue;
+                    }
+                    break;
+                } while (true);
+                while (true)
+                {
+                    DoctorList.displayDoctors();
+                    cout << "Please select doctor you want: ";
+                    appointment->DoctorID = getValidatedNumericInput("Please enter valid ID: ");
+                    if (DoctorList.findDoctor(appointment->DoctorID))
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                while (true)
+                {
+                    ServiceList.displayService();
+
+                    cout << "Please select service you want: ";
+                    appointment->ServiceID = getValidatedNumericInput("Please enter valid ID: ");
+                    if (!serviceExists(appointment->ServiceID))
+                    {
+                        cout << "Please try again.\n";
+                        continue;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                cout << "Appointment not found\n";
+                break;
+            }
+                UpdateAppointmentInfo(appointment);
+                cout << "Update success.\n";
+            break;
+        case 3:
+            cout << "Please enter Appointment ID: ";
+            AppointmentID = getValidatedNumericInput("Please enter valid ID: ");
+            if (AppointmentList.findAppointment(AppointmentID))
+            {
+                string flag;
+                cout << "Your sure you want to delete the Appointment?(N/Y)";
+                flag = getValidatedStringInput("Please enter valid input: ");
+                if (flag == "Y")
+                {
+                    deleteAppointment(AppointmentID);
+                }
+                else if (flag == "N")
+                {
+                    cout << "Exiting...\n";
+                }
+                else
+                {
+                    cout << "Invalid input, please try again.\n";
+                }
+            }
+            else
+            {
+                cout << "Appointment not found";
+                break;
+            }
+            break;
+        case 4:
+            return;
+        default:
+            cout << "invalid choice.\n";
+        }
+    }
+}
+void medicinePlatform()
+{
+    MedicineNode *medicine = new MedicineNode();
+    int choice;
+    int MedicineID;
+    while (true)
+    {
+        cout << "---------------Medicine Platform-----------------\n"
+             << "---------Please select your service.----------\n";
+        cout << "1. Medicine Info \n2. Modify Medicine \n3. Add Medicine \n4. Delete Medicine \n5. Exit\n";
+        choice = getValidatedNumericInput("Please enter valid choice: ");
+        switch (choice)
+        {
+        case 1:
+            MedicineList.displayMedicine();
+            break;
+        case 2:
+            bool flag;
+            cout << "Please enter medicine ID you want to modify: ";
+            MedicineID = getValidatedNumericInput("Please enter valid ID: ");
+            if (MedicineList.findMedicine(MedicineID))
+            {
+                medicine->MedicineID = MedicineID;
+                cout << "Enter Medicine name: ";
+                medicine->name = getValidatedStringInput("Please enter valid date: ");
+                cout << "Please enter description: ";
+                medicine->description = getValidatedStringInput("Please enter valid input: ");
+            }
+            else
+            {
+                cout << "Medicine not found\n";
+                break;
+            }
+                UpdateMedicineInfo(medicine);
+                cout << "Update success.\n";
+            break;
+        case 3:
+            cout << "Please enter Medicine name: ";
+            medicine->name = getValidatedStringInput("Please enter vawlid input: ");
+            cout << "Please enter description: ";
+            medicine->description = getValidatedStringInput("Please enter valid input: ");
+            InsertMedicineInfo(medicine);
+            cout << "Medicine added success.\n";
+            break;
+        case 4:
+            cout << "Please enter Medicine ID: ";
+            MedicineID = getValidatedNumericInput("Please enter valid ID: ");
+            if (MedicineList.findMedicine(MedicineID))
+            {
+                string flag;
+                cout << "Your sure you want to delete the Medicine?(N/Y)";
+                flag = getValidatedStringInput("Please enter valid input: ");
+                if (flag == "Y")
+                {
+                    DeleteMedicineInfo(MedicineID);
+                }
+                else if (flag == "N")
+                {
+                    cout << "Exiting...\n";
+                }
+                else
+                {
+                    cout << "Invalid input, please try again.\n";
+                }
+            }
+            else
+            {
+                cout << "Appointment not found";
+                break;
+            }
+            break;
+        case 5:
+            return;
+        default:
+            cout << "invalid choice.\n";
+        }
+    }
 }

@@ -28,7 +28,8 @@ int main() {
     loadFeedbackInfo();
     loadMedicineInfo();
     loadPrescriptionInfo();
-    //deleteFunction();
+    loadAdminInfo();
+    //`deleteFunction();
 
      while(true) {
         cout << "---------Welcome to New Era medical appointment schedule system---------\n";
