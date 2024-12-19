@@ -1464,7 +1464,7 @@ void insertDoctorProfileInfo()
     {
         cout << "First time login(0 for first time)?(0/1):\n";
         count = getValidatedNumericInput("Please enter valid choice: ");
-        if (count == 1)
+        if (count != 0)
         {
             break;
         }

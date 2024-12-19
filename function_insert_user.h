@@ -616,8 +616,7 @@ public:
             }
             current = current->next;
         }
-        cout << "Doctor with ID " << id << " not found!\n"
-             << endl;
+        cout << "Doctor with ID " << id << " not found!\n";
         return false;
     }
     void displayDoctors() const
@@ -4016,32 +4015,4 @@ void InsertPrescriptionMedicine(int PrescriptionID, int MedicineID)
     sqlite3_close(db);
     sqlite3_finalize(stmt);
 }
-void deleteFunction()
-{
-    sqlite3 *db;
-    sqlite3_stmt *stmt;
 
-    int exit = sqlite3_open("medical_appointment_system.db", &db);
-    if (exit != SQLITE_OK)
-    {
-        cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
-        return;
-    }
-
-    const char *sql = ";";
-
-    // Prepare the SQL statement
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)
-    {
-        cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
-        sqlite3_close(db);
-        return;
-    }
-
-    // Execute the SQL statement
-    int result = sqlite3_step(stmt);
-
-    // Finalize the statement and close the database connection
-    sqlite3_finalize(stmt);
-    sqlite3_close(db);
-}
