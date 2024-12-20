@@ -1918,6 +1918,8 @@ void userPlatform()
                 }
             }
             break;
+        case 4:
+            return;
         default:
             cout << "invalid choice.\n";
         }
