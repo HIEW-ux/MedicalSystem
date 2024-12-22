@@ -634,37 +634,44 @@ public:
             current = current->next;
         }
     }
-    void bubbleSorting()
-    {
+   void bubbleSorting() {
+    if (!head || !head->next) {
+        // 空链表或只有一个节点时无需排序
+        return;
+    }
+
     bool swapped;
-    DoctorNode* end = nullptr;
+    DoctorNode* end = nullptr; // 表示每次冒泡排序的终止点
 
     do {
         swapped = false;
         DoctorNode* prev = nullptr;
         DoctorNode* current = head;
-        DoctorNode* temp = nullptr;
 
         while (current->next != end) {
             if (current->age > current->next->age) {
-                temp = current->next;
+                // 交换当前节点与下一个节点
+                DoctorNode* temp = current->next;
                 current->next = temp->next;
                 temp->next = current;
 
                 if (prev) {
                     prev->next = temp;
                 } else {
-                    head = temp;
+                    head = temp; // 如果是头节点，需要更新 head
                 }
 
                 swapped = true;
+                prev = temp; // 更新 prev 为交换后的新节点
+            } else {
+                prev = current; // 没有交换时正常移动 prev
+                current = current->next;
             }
-            prev = (swapped ? temp : current);
-            current = prev->next;
         }
-        end = current;
+        end = current; // 更新 end 为最后一个已排序的节点
     } while (swapped);
-    }
+}
+
     void updateDoctor(DoctorNode *doctor)
     {
         DoctorNode *current = head;
