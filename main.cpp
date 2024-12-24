@@ -3,6 +3,7 @@
 using namespace std;
 
 int main() {
+    string username;
     sqlite3 *db;
     int exitCode;
 
@@ -40,7 +41,9 @@ int main() {
             break;
             case 2: signIn();
             break;
-            case 3: cout << "forget password\n";
+            case 3: cout << "Please enter your username: \n";
+            username = getValidatedStringInput("Please enter valid input: ");
+            forgetPassword(username);
             break;
             case 4: cout << "Exit\n";
             return 0;

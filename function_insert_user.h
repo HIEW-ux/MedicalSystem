@@ -636,12 +636,11 @@ public:
     }
    void bubbleSorting() {
     if (!head || !head->next) {
-        // 空链表或只有一个节点时无需排序
         return;
     }
 
     bool swapped;
-    DoctorNode* end = nullptr; // 表示每次冒泡排序的终止点
+    DoctorNode* end = nullptr;
 
     do {
         swapped = false;
@@ -650,7 +649,6 @@ public:
 
         while (current->next != end) {
             if (current->age > current->next->age) {
-                // 交换当前节点与下一个节点
                 DoctorNode* temp = current->next;
                 current->next = temp->next;
                 temp->next = current;
@@ -658,17 +656,17 @@ public:
                 if (prev) {
                     prev->next = temp;
                 } else {
-                    head = temp; // 如果是头节点，需要更新 head
+                    head = temp; 
                 }
 
                 swapped = true;
-                prev = temp; // 更新 prev 为交换后的新节点
+                prev = temp;
             } else {
-                prev = current; // 没有交换时正常移动 prev
+                prev = current;
                 current = current->next;
             }
         }
-        end = current; // 更新 end 为最后一个已排序的节点
+        end = current;
     } while (swapped);
 }
 
@@ -1294,6 +1292,18 @@ private:
 
 public:
     Appointment() : head(nullptr), tail(nullptr) {}
+    ~Appointment()
+     {
+        AppointmentNode *current = head;
+        while (current != nullptr)
+        {
+            AppointmentNode *next = current->next;
+            delete current;
+            current = next;
+        }
+        head = nullptr;
+        tail = nullptr;
+    }
     void addAppointment(const AppointmentNode &appointment)
     {
         AppointmentNode *newAppointment = new AppointmentNode(appointment);
@@ -2008,25 +2018,33 @@ void loadAllergies();
 //Emergency contact load and insert function
 void InsertEmergencyInfo(EmergencyContactNode *ec);
 void loadEmergencyContactInfo();
+//Medical Records load and insert function
 void InsertMedicalRecords(MedicalRecordsNode *record);
 void loadMedicalRecords();
+//Patient address and insurance insert function
 void InsertPatientInsurance(int PatientID, int InsuranceID);
 void InsertPatientAddress(AddressNode *address);
 void loadPatientAddress();
+//Health service info load in linked list
 void loadServiceInfo();
+//Insert, update and delete function of appointment info
 void InsertAppointmentInfo(AppointmentNode *appointment);
 void loadAppointmentInfo();
 void UpdateAppointmentInfo(AppointmentNode *appointment);
 bool updateAppointmentStatus(sqlite3 *db, int appointmentID);
 void deleteAppointment(int id);
+//Insert payment info and load into linked list
 void InsertPaymentInfo(PaymentNode *payment);
 void loadPaymentInfo();
+//Feedback function
 void InsertFeedbackInfo(FeedbackNode *feedback);
 void loadFeedbackInfo();
+//Admin to insert, update and delete medicine info
 void InsertMedicineInfo(MedicineNode *medicine);
 void UpdateMedicineInfo(MedicineNode *medicine);
 void DeleteMedicineInfo(int MedicineID);
 void loadMedicineInfo();
+//Doctor to add prescription and medicine include info
 int InsertPrescriptionInfo(PrescriptionNode *prescription);
 void loadPrescriptionInfo();
 void InsertPrescriptionMedicine(int PrescriptionID, int MedicineID);
@@ -3684,7 +3702,7 @@ void InsertFeedbackInfo(FeedbackNode *feedback)
         feedback->setID(id);
 
         FeedbackList.addFeedback(*feedback);
-        cout << "Payment information inserted successfully.\n";
+        cout << "Feedback information inserted successfully.\n";
     }
 
     // Finalize the statement and close the database connection
@@ -3803,7 +3821,7 @@ void InsertMedicineInfo(MedicineNode *medicine)
         medicine->setID(id);
 
         MedicineList.addMedicine(*medicine);
-        cout << "Payment information inserted successfully.\n";
+        cout << "Medicine information inserted successfully.\n";
     }
 
     // Finalize the statement and close the database connection

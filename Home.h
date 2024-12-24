@@ -7,6 +7,7 @@ bool checkIc(const string &ic);
 bool checkPhoneNumber(const string &phonenumber);
 void signIn();
 void logIn();
+void forgetPassword(string username);
 void patientPlatForm();
 void information();
 void bookingAppointment();
@@ -277,6 +278,36 @@ void logIn()
     {
         cout << "username or password incorrect\n";
     }
+}
+void forgetPassword(string username)
+{
+    sqlite3 *db;
+    sqlite3_stmt* stmt;
+    char *messageError;
+    int exit = sqlite3_open("medical_appointment_system.db", &db);
+
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
+        return;
+    }
+
+    const char *sql = "SELECT password FROM users WHERE username = ?;";
+    exit = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    if (exit != SQLITE_OK)
+    {
+        cerr << "Error preparing statement: " << sqlite3_errmsg(db) << endl;
+        sqlite3_close(db);
+        return;
+    }
+    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+    while (sqlite3_step(stmt) == SQLITE_ROW)
+    {
+        string password = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0));
+        cout << "Your password: " << password << "\n";
+    }
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
 }
 // Patient Platform
 void patientPlatForm()
