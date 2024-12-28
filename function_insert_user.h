@@ -1990,7 +1990,6 @@ public:
         }
     }
 };
-static int callback(void *data, int argc, char **argv, char **azColName);
 void initializedDatabase(sqlite3 *db);
 void loadDepartmentInfo();
 void loadInsuranceInfo();
@@ -2067,19 +2066,6 @@ Medicine MedicineList;
 Prescription PrescriptionList;
 Admin AdminList;
 
-static int callback(void *data, int argc, char **argv, char **azColName)
-{
-    int i;
-    fprintf(stderr, "%s: ", (const char *)data);
-
-    for (i = 0; i < argc; i++)
-    {
-        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-    }
-
-    printf("\n");
-    return 0;
-}
 // Create all tables in database
 void initializedDatabase(sqlite3 *db)
 {
@@ -2314,7 +2300,7 @@ void loadAllergies()
 
     if (exit != SQLITE_OK)
     {
-        cerr << "无法打开数据库: " << sqlite3_errmsg(db) << "\n";
+        cerr << "Error opening database:  " << sqlite3_errmsg(db) << "\n";
         return;
     }
 
@@ -2322,7 +2308,7 @@ void loadAllergies()
 
     if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK)
     {
-        cerr << "SQL 准备失败: " << sqlite3_errmsg(db) << "\n";
+        cerr << "SQL error: " << sqlite3_errmsg(db) << "\n";
         sqlite3_close(db);
         return;
     }
@@ -3031,13 +3017,13 @@ void loadDepartmentInfo()
 
     if (sqlite3_open("medical_appointment_system.db", &db))
     {
-        cerr << "无法打开数据库: " << sqlite3_errmsg(db) << endl;
+        cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
         return;
     }
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)
     {
-        cerr << "SQL 错误: " << sqlite3_errmsg(db) << endl;
+        cerr << "SQL error: " << sqlite3_errmsg(db) << endl;
         sqlite3_close(db);
         return;
     }
@@ -3152,13 +3138,13 @@ void loadMedicalRecords()
 
     if (sqlite3_open("medical_appointment_system.db", &db))
     {
-        cerr << "无法打开数据库: " << sqlite3_errmsg(db) << endl;
+        cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
         return;
     }
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)
     {
-        cerr << "SQL 错误: " << sqlite3_errmsg(db) << endl;
+        cerr << "SQL error " << sqlite3_errmsg(db) << endl;
         sqlite3_close(db);
         return;
     }
@@ -3185,13 +3171,13 @@ void loadInsuranceInfo()
 
     if (sqlite3_open("medical_appointment_system.db", &db))
     {
-        cerr << "无法打开数据库: " << sqlite3_errmsg(db) << endl;
+        cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
         return;
     }
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)
     {
-        cerr << "SQL 错误: " << sqlite3_errmsg(db) << endl;
+        cerr << "SQL error " << sqlite3_errmsg(db) << endl;
         sqlite3_close(db);
         return;
     }
@@ -3308,13 +3294,13 @@ void loadPatientAddress()
 
     if (sqlite3_open("medical_appointment_system.db", &db))
     {
-        cerr << "无法打开数据库: " << sqlite3_errmsg(db) << endl;
+        cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
         return;
     }
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)
     {
-        cerr << "SQL 错误: " << sqlite3_errmsg(db) << endl;
+        cerr << "SQL error: " << sqlite3_errmsg(db) << endl;
         sqlite3_close(db);
         return;
     }
@@ -3341,13 +3327,13 @@ void loadServiceInfo()
 
     if (sqlite3_open("medical_appointment_system.db", &db))
     {
-        cerr << "无法打开数据库: " << sqlite3_errmsg(db) << endl;
+        cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
         return;
     }
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)
     {
-        cerr << "SQL 错误: " << sqlite3_errmsg(db) << endl;
+        cerr << "SQL error: "<< sqlite3_errmsg(db) << endl;
         sqlite3_close(db);
         return;
     }
@@ -3425,13 +3411,13 @@ void loadAppointmentInfo()
 
     if (sqlite3_open("medical_appointment_system.db", &db))
     {
-        cerr << "无法打开数据库: " << sqlite3_errmsg(db) << endl;
+        cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
         return;
     }
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK)
     {
-        cerr << "SQL 错误: " << sqlite3_errmsg(db) << endl;
+        cerr << "SQL error: " << sqlite3_errmsg(db) << endl;
         sqlite3_close(db);
         return;
     }
@@ -3628,7 +3614,7 @@ void loadPaymentInfo()
 
     if (exit != SQLITE_OK)
     {
-        cerr << "无法打开数据库: " << sqlite3_errmsg(db) << "\n";
+        cerr << "Error opening database: " << sqlite3_errmsg(db) << "\n";
         return;
     }
 
@@ -3636,7 +3622,7 @@ void loadPaymentInfo()
 
     if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK)
     {
-        cerr << "SQL 准备失败: " << sqlite3_errmsg(db) << "\n";
+        cerr << "SQL error: " << sqlite3_errmsg(db) << "\n";
         sqlite3_close(db);
         return;
     }
@@ -3717,7 +3703,7 @@ void loadFeedbackInfo()
 
     if (exit != SQLITE_OK)
     {
-        cerr << "无法打开数据库: " << sqlite3_errmsg(db) << "\n";
+        cerr << "Error opening database: " << sqlite3_errmsg(db) << "\n";
         return;
     }
 
@@ -3725,7 +3711,7 @@ void loadFeedbackInfo()
 
     if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK)
     {
-        cerr << "SQL 准备失败: " << sqlite3_errmsg(db) << "\n";
+        cerr << "SQL error: " << sqlite3_errmsg(db) << "\n";
         sqlite3_close(db);
         return;
     }

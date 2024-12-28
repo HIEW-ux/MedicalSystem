@@ -535,10 +535,8 @@ void checkAllergyInfo(int PatientID)
         return;
     }
 
-    // Bind the PatientID parameter
     sqlite3_bind_int(stmt, 1, PatientID);
 
-    // Execute the query and display the results
     cout << "Allergy information for PatientID: " << PatientID << "\n";
     cout << "-------------------------------------\n";
 
@@ -562,7 +560,6 @@ void checkAllergyInfo(int PatientID)
         cout << "No allergies found for this patient.\n";
     }
 
-    // Finalize the statement and close the database connection
     sqlite3_finalize(stmt);
     sqlite3_close(db);
 }
@@ -620,7 +617,6 @@ bool allergyContains(int allergyid, int PatientID)
         return false;
     }
 
-    // Now, check if the patient already has the insurance ID
     const char *sql = "SELECT COUNT(*) FROM Allergies_Patient WHERE Allergyid = ? AND Patientid = ?;";
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK)
     {
@@ -632,7 +628,7 @@ bool allergyContains(int allergyid, int PatientID)
             int count = sqlite3_column_int(stmt, 0);
             if (count > 0)
             {
-                flag = true; // InsuranceID already exists for this patient
+                flag = true;
             }
         }
     }
@@ -679,7 +675,7 @@ void insertEmergencyContact()
     EmergencyContactNode *ec = new EmergencyContactNode();
     while (true)
     {
-        cout << "Please enter your Patient ID(0 fro exit): ";
+        cout << "Please enter your Patient ID(0 for exit): ";
         ec->patientid = getValidatedNumericInput("Invalid input, Please enter a valid ID: ");
         if (!PatientList.findPatient(ec->patientid))
         {
